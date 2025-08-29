@@ -1,12 +1,12 @@
 import { usersRouter } from "@/routes/auth.routes";
 import { toursRouter } from "@/routes/tour.routes";
-import type { NextFunction, Request } from "express";
-import express from "express";
+import express, { NextFunction, Request } from "express";
 import morgan from "morgan";
+import config from "@/config/config";
 
 const app = express();
 
-if (process.env.NODE_ENV === "development") {
+if (config.development) {
   app.use(morgan("dev"));
 }
 

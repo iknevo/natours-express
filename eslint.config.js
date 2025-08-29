@@ -1,23 +1,18 @@
 import js from "@eslint/js";
-import prettierPlugin from "eslint-plugin-prettier";
-import { defineConfig } from "eslint/config";
+import { defineConfig, globalIgnores } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default defineConfig([
-  tseslint.configs.recommended,
+  globalIgnores(["dist", "node_modules", "build"]),
   {
-    ignores: ["node_modules/", "dist/", "build/"],
     files: ["**/*.{js,mjs,cjs,ts}"],
-
+    extends: [js.configs.recommended, tseslint.configs.recommended],
     languageOptions: {
       globals: globals.node,
       ecmaVersion: "latest",
+      parser: tseslint.parser,
     },
-    plugins: {
-      prettier: prettierPlugin,
-    },
-    extends: [js.configs.recommended],
     rules: {
       "spaced-comment": "off",
       "consistent-return": "off",
@@ -29,11 +24,13 @@ export default defineConfig([
       "no-return-await": "off",
       "no-underscore-dangle": "off",
       "class-methods-use-this": "off",
-      "prefer-destructuring": ["warn", { object: true, array: false }],
-      "no-unused-vars": ["warn", { argsIgnorePattern: "req|res|next|val" }],
+      "prefer-destructuring": ["error", { object: true, array: false }],
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "req|res|next|val" },
+      ],
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/ban-ts-comment": "off",
-      "no-relative-import-paths/no-relative-import-paths": "error",
     },
   },
 ]);

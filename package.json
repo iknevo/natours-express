@@ -5,8 +5,12 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "start:dev": "cross-env NODE_ENV=development bun src/server.ts",
-    "start:prod": "cross-env NODE_ENV=production bun src/server.ts"
+    "watch": "bun --watch src/server.ts",
+    "dev": "cross-env NODE_ENV=development",
+    "start:dev": "bun run dev && bun run watch",
+    "start:prod": "cross-env NODE_ENV=production bun src/server.ts",
+    "db:create": "bun src/scripts/seed.ts --create",
+    "db:delete": "bun src/scripts/seed.ts --delete"
   },
   "keywords": [],
   "author": "",

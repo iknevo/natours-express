@@ -42,24 +42,33 @@ export const getAllTours = async (req: Request, res: Response) => {
   try {
     await dbConnect();
     const { page, sort, limit, fields, ...rawFilters } = req.query;
+    // 1. filtering
     const allowedFilters = Object.keys(Tour.schema.paths);
     const filters = Object.fromEntries(
       Object.entries(rawFilters).filter(([key]) =>
         allowedFilters.includes(key),
       ),
     );
-    console.log(filters);
     let filterStr = JSON.stringify(filters);
     filterStr = filterStr.replace(/\b(gte|gt|lte|lt)\b/g, (m) => `$${m}`);
+    let query = Tour.find(JSON.parse(filterStr));
     // { duration: { gte: "5", }, difficulty: "easy"}
+    // 2. sorting
+    if (sort) {
+      const sortBy = (sort as string).split(",").join(" ");
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort("-createdAt");
+    }
+    // 3. field limiting
+    if (fields) {
+      const selectedFields = (fields as string).split(",").join(" ");
+      query = query.select(`${selectedFields} -__v`);
+    } else {
+      query = query.select("-__v");
+    }
 
-    const query = Tour.find(JSON.parse(filterStr));
-    // .where("duration")
-    // .equals(5)
-    // .where("difficulty")
-    // .equals("easy");
     const tours = await query;
-
     res.status(status.OK).json({
       status: { success: true, code: status.OK },
       results: tours.length,

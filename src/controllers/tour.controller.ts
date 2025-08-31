@@ -41,7 +41,7 @@ import { status } from "http-status";
 export const getAllTours = async (req: Request, res: Response) => {
   try {
     await dbConnect();
-    const { page, sort, limit, fields, ...rawFilters } = req.query;
+    const { page = 1, sort, limit = 10, fields, ...rawFilters } = req.query;
     // 1. filtering
     const allowedFilters = Object.keys(Tour.schema.paths);
     const filters = Object.fromEntries(
@@ -51,7 +51,8 @@ export const getAllTours = async (req: Request, res: Response) => {
     );
     let filterStr = JSON.stringify(filters);
     filterStr = filterStr.replace(/\b(gte|gt|lte|lt)\b/g, (m) => `$${m}`);
-    let query = Tour.find(JSON.parse(filterStr));
+    const mongoFilters = JSON.parse(filterStr);
+    let query = Tour.find(mongoFilters);
     // { duration: { gte: "5", }, difficulty: "easy"}
     // 2. sorting
     if (sort) {
@@ -68,10 +69,26 @@ export const getAllTours = async (req: Request, res: Response) => {
       query = query.select("-__v");
     }
 
+    // 4. pagination
+    const pageNum = +page;
+    const limitNum = +limit;
+    const skip = (pageNum - 1) * limitNum;
+    const totalDocs = await Tour.countDocuments(mongoFilters);
+    const totalPages = Math.ceil(totalDocs / limitNum);
+    if (pageNum !== -1) query = query.skip(skip).limit(limitNum);
+    if (pageNum > totalPages) throw new Error("this page doesn't exist");
+
     const tours = await query;
     res.status(status.OK).json({
       status: { success: true, code: status.OK },
-      results: tours.length,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        totalItems: totalDocs,
+        totalPages: totalPages,
+        hasNextPage: pageNum < totalPages,
+        hasPrevPage: pageNum > 1,
+      },
       data: { tours },
     });
   } catch {

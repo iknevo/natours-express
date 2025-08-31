@@ -49,7 +49,11 @@ export const getAllTours = async (req: Request, res: Response) => {
       ),
     );
     console.log(filters);
-    const query = Tour.find(filters);
+    let filterStr = JSON.stringify(filters);
+    filterStr = filterStr.replace(/\b(gte|gt|lte|lt)\b/g, (m) => `$${m}`);
+    // { duration: { gte: "5", }, difficulty: "easy"}
+
+    const query = Tour.find(JSON.parse(filterStr));
     // .where("duration")
     // .equals(5)
     // .where("difficulty")

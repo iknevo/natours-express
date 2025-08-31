@@ -38,10 +38,23 @@ import { status } from "http-status";
 //   return next();
 // };
 
-export const getAllTours = async (_: any, res: Response) => {
+export const getAllTours = async (req: Request, res: Response) => {
   try {
     await dbConnect();
-    const tours = await Tour.find();
+    const { page, sort, limit, fields, ...rawFilters } = req.query;
+    const allowedFilters = Object.keys(Tour.schema.paths);
+    const filters = Object.fromEntries(
+      Object.entries(rawFilters).filter(([key]) =>
+        allowedFilters.includes(key),
+      ),
+    );
+    console.log(filters);
+    const query = Tour.find(filters);
+    // .where("duration")
+    // .equals(5)
+    // .where("difficulty")
+    // .equals("easy");
+    const tours = await query;
 
     res.status(status.OK).json({
       status: { success: true, code: status.OK },

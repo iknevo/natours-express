@@ -4,7 +4,7 @@ export class APIFeatures<T extends Document> {
     private query: Query<T[], T>,
     private queryString: Record<string, any>,
   ) {}
-  filter(allowedFilters: string[]) {
+  filter() {
     // 1. filtering
     const excludedFilters = ["page", "sort", "limit", "fields"];
     const filters = Object.fromEntries(

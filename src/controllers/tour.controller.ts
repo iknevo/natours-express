@@ -46,7 +46,7 @@ export const getAllTours = async (req: Request, res: Response) => {
   try {
     await dbConnect();
     const features = new APIFeatures(Tour.find(), req.query)
-      .filter(Object.keys(Tour.schema.paths))
+      .filter()
       .sort()
       .limitFields();
 

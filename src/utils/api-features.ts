@@ -5,11 +5,11 @@ export class APIFeatures<T extends Document> {
     private queryString: Record<string, any>,
   ) {}
   filter(allowedFilters: string[]) {
-    const { page, sort, limit, fields, ...rawFilters } = this.queryString;
     // 1. filtering
+    const excludedFilters = ["page", "sort", "limit", "fields"];
     const filters = Object.fromEntries(
-      Object.entries(rawFilters).filter(([key]) =>
-        allowedFilters.includes(key),
+      Object.entries(this.queryString).filter(
+        ([key]) => !excludedFilters.includes(key),
       ),
     );
     let filterStr = JSON.stringify(filters);

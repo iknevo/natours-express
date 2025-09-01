@@ -1,9 +1,11 @@
 import dbConnect from "@/config/db";
 import { Tour } from "@/models/tour.model";
+import { APIFeatures } from "@/utils/api-features";
 import type { NextFunction, Request, Response } from "express";
 import { status } from "http-status";
 
 // export const checkId = (
+
 //   _: any,
 //   res: Response,
 //   next: NextFunction,
@@ -34,7 +36,6 @@ import { status } from "http-status";
 //   }
 //   return next();
 // };
-
 export const aliasTopTours = (req: Request, _: any, next: NextFunction) => {
   req.query.limit = "5";
   req.query.sort = "-ratingsAverage,price";
@@ -44,54 +45,53 @@ export const aliasTopTours = (req: Request, _: any, next: NextFunction) => {
 export const getAllTours = async (req: Request, res: Response) => {
   try {
     await dbConnect();
-    const { page = 1, sort, limit = 10, fields, ...rawFilters } = req.query;
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter(Object.keys(Tour.schema.paths))
+      .sort()
+      .limitFields();
+
+    const { query, pagination } = await features.paginate();
     // 1. filtering
-    const allowedFilters = Object.keys(Tour.schema.paths);
-    const filters = Object.fromEntries(
-      Object.entries(rawFilters).filter(([key]) =>
-        allowedFilters.includes(key),
-      ),
-    );
-    let filterStr = JSON.stringify(filters);
-    filterStr = filterStr.replace(/\b(gte|gt|lte|lt)\b/g, (m) => `$${m}`);
-    const mongoFilters = JSON.parse(filterStr);
-    let query = Tour.find(mongoFilters);
+    // const allowedFilters = Object.keys(Tour.schema.paths);
+    // const filters = Object.fromEntries(
+    //   Object.entries(rawFilters).filter(([key]) =>
+    //     allowedFilters.includes(key),
+    //   ),
+    // );
+    // let filterStr = JSON.stringify(filters);
+    // filterStr = filterStr.replace(/\b(gte|gt|lte|lt)\b/g, (m) => `$${m}`);
+    // const mongoFilters = JSON.parse(filterStr);
+    // let query = Tour.find(mongoFilters);
     // { duration: { gte: "5", }, difficulty: "easy"}
     // 2. sorting
-    if (sort) {
-      const sortBy = (sort as string).split(",").join(" ");
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort("-createdAt");
-    }
+    // if (sort) {
+    //   const sortBy = (sort as string).split(",").join(" ");
+    //   query = query.sort(sortBy);
+    // } else {
+    //   query = query.sort("-createdAt");
+    // }
     // 3. field limiting
-    if (fields) {
-      const selectedFields = (fields as string).split(",").join(" ");
-      query = query.select(selectedFields).select("-__v");
-    } else {
-      query = query.select("-__v");
-    }
+    // if (fields) {
+    //   const selectedFields = (fields as string).split(",").join(" ");
+    //   query = query.select(selectedFields).select("-__v");
+    // } else {
+    //   query = query.select("-__v");
+    // }
 
     // 4. pagination
-    const pageNum = +page;
-    const limitNum = +limit;
-    const skip = (pageNum - 1) * limitNum;
-    const totalDocs = await Tour.countDocuments(mongoFilters);
-    const totalPages = Math.ceil(totalDocs / limitNum);
-    if (pageNum !== -1) query = query.skip(skip).limit(limitNum);
-    if (pageNum > totalPages) throw new Error("this page doesn't exist");
 
     const tours = await query;
     res.status(status.OK).json({
       status: { success: true, code: status.OK },
-      pagination: {
-        page: pageNum,
-        limit: limitNum,
-        totalItems: totalDocs,
-        totalPages: totalPages,
-        hasNextPage: pageNum < totalPages,
-        hasPrevPage: pageNum > 1,
-      },
+      // pagination: {
+      //   page: pageNum,
+      //   limit: limitNum,
+      //   totalItems: totalDocs,
+      //   totalPages: totalPages,
+      //   hasNextPage: pageNum < totalPages,
+      //   hasPrevPage: pageNum > 1,
+      // },
+      pagination,
       data: { tours },
     });
   } catch {

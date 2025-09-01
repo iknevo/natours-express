@@ -67,7 +67,7 @@ export const getAllTours = async (req: Request, res: Response) => {
     // 3. field limiting
     if (fields) {
       const selectedFields = (fields as string).split(",").join(" ");
-      query = query.select(`${selectedFields}`);
+      query = query.select(selectedFields).select("-__v");
     } else {
       query = query.select("-__v");
     }

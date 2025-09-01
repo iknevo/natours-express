@@ -3,9 +3,6 @@ import { Tour } from "@/models/tour.model";
 import type { NextFunction, Request, Response } from "express";
 import { status } from "http-status";
 
-// const toursData = JSON.parse(
-//   readFileSync("./dev-data/data/tours-simple.json", "utf-8"),
-// );
 // export const checkId = (
 //   _: any,
 //   res: Response,

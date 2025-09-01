@@ -1,6 +1,6 @@
 import dbConnect from "@/config/db";
 import { Tour } from "@/models/tour.model";
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { status } from "http-status";
 
 // const toursData = JSON.parse(
@@ -38,6 +38,12 @@ import { status } from "http-status";
 //   return next();
 // };
 
+export const aliasTopTours = (req: Request, _: any, next: NextFunction) => {
+  req.query.limit = "5";
+  req.query.sort = "-ratingsAverage,price";
+  req.query.fields = "name,price,ratingsAverage,summary,difficulty";
+  next();
+};
 export const getAllTours = async (req: Request, res: Response) => {
   try {
     await dbConnect();
@@ -64,7 +70,7 @@ export const getAllTours = async (req: Request, res: Response) => {
     // 3. field limiting
     if (fields) {
       const selectedFields = (fields as string).split(",").join(" ");
-      query = query.select(`${selectedFields} -__v`);
+      query = query.select(`${selectedFields}`);
     } else {
       query = query.select("-__v");
     }

@@ -10,7 +10,8 @@
     "start:dev": "bun run dev && bun run watch",
     "start:prod": "cross-env NODE_ENV=production bun src/server.ts",
     "db:create": "bun src/scripts/seed.ts --create",
-    "db:delete": "bun src/scripts/seed.ts --delete"
+    "db:delete": "bun src/scripts/seed.ts --delete",
+    "db:seed": "bun run db:delete && bun run db:create"
   },
   "keywords": [],
   "author": "",

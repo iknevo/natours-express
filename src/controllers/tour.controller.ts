@@ -1,6 +1,7 @@
 import dbConnect from "@/config/db";
 import { Tour } from "@/models/tour.model";
 import { APIFeatures } from "@/utils/api-features";
+import { endOfYear, startOfYear } from "date-fns";
 import type { NextFunction, Request, Response } from "express";
 import { status } from "http-status";
 
@@ -144,6 +145,52 @@ export const getTourStats = async (_: any, res: Response) => {
     res.status(status.OK).json({
       status: { success: true, code: status.OK },
       data: { stats },
+    });
+  } catch {
+    res.status(status.BAD_REQUEST).json({
+      status: {
+        success: false,
+        code: status.BAD_REQUEST,
+        message: "Invalid Data sent!",
+      },
+    });
+  }
+};
+export const getMonthlyPlan = async (req: Request, res: Response) => {
+  try {
+    await dbConnect();
+    const year = +req.params.year;
+    const plan = await Tour.aggregate([
+      { $unwind: "$startDates" },
+      {
+        $match: {
+          startDates: {
+            $gte: startOfYear(new Date(year, 0, 1)),
+            $lte: endOfYear(new Date(year, 0, 1)),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: "$startDates" },
+          numTourStarts: { $sum: 1 },
+          tours: {
+            $push: "$name",
+          },
+        },
+      },
+      { $addFields: { month: "$_id" } },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+      { $sort: { numTourStart: -1 } },
+    ]);
+
+    res.status(status.OK).json({
+      status: { success: true, code: status.OK },
+      data: { plan },
     });
   } catch {
     res.status(status.BAD_REQUEST).json({

@@ -138,9 +138,6 @@ export const getTourStats = async (_: any, res: Response) => {
       {
         $sort: { avgPrice: -1 },
       },
-      // {
-      //   $match: { _id: { $ne: "EASY" } },
-      // },
     ]);
     res.status(status.OK).json({
       status: { success: true, code: status.OK },

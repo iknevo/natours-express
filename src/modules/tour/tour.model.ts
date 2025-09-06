@@ -57,6 +57,7 @@ const toursSchema = new Schema(
   },
   {
     toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
 toursSchema.virtual("durationWeeks").get(function () {

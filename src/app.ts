@@ -1,6 +1,6 @@
 import config from "@/config/config";
-import { usersRouter } from "@/routes/auth.routes";
-import { toursRouter } from "@/routes/tour.routes";
+import { toursRouter } from "@/modules/tour/tour.routes";
+import { usersRouter } from "@/modules/user/auth.routes";
 import express, { NextFunction, Request } from "express";
 import morgan from "morgan";
 import qs from "qs";

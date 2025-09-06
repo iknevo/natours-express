@@ -7,7 +7,7 @@ import {
   getTour,
   getTourStats,
   updateTour,
-} from "@/controllers/tour.controller";
+} from "@/modules/tour/tour.controller";
 import express from "express";
 
 const router = express.Router();

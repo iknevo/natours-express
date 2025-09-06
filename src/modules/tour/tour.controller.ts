@@ -1,5 +1,5 @@
 import dbConnect from "@/config/db";
-import { Tour } from "@/models/tour.model";
+import { Tour } from "@/modules/tour/tour.model";
 import { APIFeatures } from "@/utils/api-features";
 import { endOfYear, startOfYear } from "date-fns";
 import type { NextFunction, Request, Response } from "express";

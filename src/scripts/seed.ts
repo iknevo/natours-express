@@ -1,5 +1,5 @@
 import dbConnect from "@/config/db";
-import { Tour } from "@/models/tour.model";
+import { Tour } from "@/modules/tour/tour.model";
 import { tours } from "./data";
 
 const createData = async () => {

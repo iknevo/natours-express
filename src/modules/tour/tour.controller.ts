@@ -17,14 +17,13 @@ export const getAllTours = async (req: Request, res: Response) => {
     const features = new APIFeatures(Tour.find(), req.query)
       .filter()
       .sort()
-      .limitFields();
+      .limitFields()
+      .paginate();
 
-    const { query, pagination } = await features.paginate();
-
-    const tours = await query;
+    const tours = await features.query;
     res.status(status.OK).json({
       status: { success: true, code: status.OK },
-      pagination,
+      numItem: tours.length,
       data: { tours },
     });
   } catch {

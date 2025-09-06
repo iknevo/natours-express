@@ -1,4 +1,4 @@
-import { InferSchemaType, model, models, Schema } from "mongoose";
+import { InferSchemaType, Model, model, models, Query, Schema } from "mongoose";
 import slugify from "slugify";
 
 const toursSchema = new Schema(
@@ -54,15 +54,22 @@ const toursSchema = new Schema(
       default: Date.now(),
     },
     startDates: [Date],
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   },
 );
+
 toursSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
 });
+
+// only works with .save() and .create()
 toursSchema.pre("save", function (next) {
   this.slug = slugify(this.name, {
     lower: true,
@@ -71,5 +78,21 @@ toursSchema.pre("save", function (next) {
   next();
 });
 
+interface QueryWithTimer<T, Doc> extends Query<T, Doc> {
+  start: number;
+}
+
+toursSchema.pre<QueryWithTimer<any, any>>(/^find/, function (next) {
+  this.find({ secretTour: { $ne: true } });
+  this.start = Date.now();
+  next();
+});
+
+toursSchema.post<QueryWithTimer<any, any>>(/^find/, function (_, next) {
+  console.log(`Query took ${Date.now() - this.start} milliseconds!`);
+  next();
+});
+
 type TourType = InferSchemaType<typeof toursSchema>;
-export const Tour = models.Tour || model<TourType>("Tour", toursSchema);
+export const Tour: Model<TourType> =
+  models.Tour || model<TourType>("Tour", toursSchema);

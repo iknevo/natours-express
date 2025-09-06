@@ -1,8 +1,8 @@
 import { Document, Query } from "mongoose";
 export class APIFeatures<T extends Document> {
   constructor(
-    private query: Query<T[], T>,
-    private queryString: Record<string, any>,
+    public query: Query<T[], T>,
+    public queryString: Record<string, any>,
   ) {}
   filter() {
     // 1. filtering
@@ -38,25 +38,11 @@ export class APIFeatures<T extends Document> {
     }
     return this;
   }
-  async paginate() {
+  paginate() {
     const pageNum = +this.queryString.page || 1;
     const limitNum = +this.queryString.limit || 10;
     const skip = (pageNum - 1) * limitNum;
-    const totalDocs = await this.query.model.countDocuments(
-      this.query.getFilter(),
-    );
-    const totalPages = Math.ceil(totalDocs / limitNum);
     if (pageNum !== -1) this.query = this.query.skip(skip).limit(limitNum);
-    return {
-      query: this.query,
-      pagination: {
-        page: pageNum,
-        totalPages,
-        totalItems: totalDocs,
-        limit: limitNum,
-        hasNextPage: pageNum < totalPages,
-        hasPrevPage: pageNum > 1,
-      },
-    };
+    return this;
   }
 }

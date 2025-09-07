@@ -5,7 +5,11 @@ import { endOfYear, startOfYear } from "date-fns";
 import type { NextFunction, Request, Response } from "express";
 import { status } from "http-status";
 
-export const aliasTopTours = (req: Request, _: any, next: NextFunction) => {
+export const aliasTopTours = (
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) => {
   req.query.limit = "5";
   req.query.sort = "-ratingsAverage,price";
   req.query.fields = "name,price,ratingsAverage,summary,difficulty";
@@ -119,7 +123,7 @@ export const deleteTour = async (req: Request, res: Response) => {
     });
   }
 };
-export const getTourStats = async (_: any, res: Response) => {
+export const getTourStats = async (_req: Request, res: Response) => {
   try {
     await dbConnect();
     const stats = await Tour.aggregate([

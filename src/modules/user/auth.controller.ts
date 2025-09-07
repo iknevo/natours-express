@@ -1,7 +1,7 @@
-import type { Response } from "express";
+import type { Request, Response } from "express";
 import { status } from "http-status";
 
-export const getAllUsers = (_: any, res: Response) => {
+export const getAllUsers = (_req: Request, res: Response) => {
   res.status(status.INTERNAL_SERVER_ERROR).json({
     status: {
       success: false,
@@ -10,7 +10,7 @@ export const getAllUsers = (_: any, res: Response) => {
     },
   });
 };
-export const getUser = (_: any, res: Response) => {
+export const getUser = (_req: Request, res: Response) => {
   res.status(status.INTERNAL_SERVER_ERROR).json({
     status: {
       success: false,
@@ -19,7 +19,7 @@ export const getUser = (_: any, res: Response) => {
     },
   });
 };
-export const createUser = (_: any, res: Response) => {
+export const createUser = (_req: Request, res: Response) => {
   res.status(status.INTERNAL_SERVER_ERROR).json({
     status: {
       success: false,
@@ -28,7 +28,7 @@ export const createUser = (_: any, res: Response) => {
     },
   });
 };
-export const updateUser = (_: any, res: Response) => {
+export const updateUser = (_req: Request, res: Response) => {
   res.status(status.INTERNAL_SERVER_ERROR).json({
     status: {
       success: false,
@@ -37,7 +37,7 @@ export const updateUser = (_: any, res: Response) => {
     },
   });
 };
-export const deleteUser = (_: any, res: Response) => {
+export const deleteUser = (_req: Request, res: Response) => {
   res.status(status.INTERNAL_SERVER_ERROR).json({
     status: {
       success: false,

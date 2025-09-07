@@ -78,7 +78,7 @@ toursSchema.pre("save", function (next) {
   next();
 });
 
-interface QueryWithTimer<T, Doc> extends Query<T, Doc> {
+interface QueryWithTimer<T, Y> extends Query<T, Y> {
   start: number;
 }
 
@@ -90,6 +90,11 @@ toursSchema.pre<QueryWithTimer<any, any>>(/^find/, function (next) {
 
 toursSchema.post<QueryWithTimer<any, any>>(/^find/, function (_, next) {
   console.log(`Query took ${Date.now() - this.start} milliseconds!`);
+  next();
+});
+
+toursSchema.pre("aggregate", function (next) {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
   next();
 });
 

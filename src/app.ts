@@ -1,8 +1,8 @@
 import config from "@/config/config";
-import { globalErrorHanlder } from "@/helpers/global-error-handler";
 import { toursRouter } from "@/modules/tour/tour.routes";
 import { usersRouter } from "@/modules/user/auth.routes";
 import { AppError } from "@/utils/app-error";
+import { globalErrorHanlder } from "@/utils/global-error-handler";
 import express, { NextFunction, Request, Response } from "express";
 import status from "http-status";
 import morgan from "morgan";

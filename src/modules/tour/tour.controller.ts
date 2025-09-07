@@ -1,8 +1,9 @@
 import dbConnect from "@/config/db";
 import { Tour } from "@/modules/tour/tour.model";
 import { APIFeatures } from "@/utils/api-features";
+import { catchHandler } from "@/utils/catch-handler";
 import { endOfYear, startOfYear } from "date-fns";
-import type { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { status } from "http-status";
 
 export const aliasTopTours = (
@@ -15,116 +16,65 @@ export const aliasTopTours = (
   req.query.fields = "name,price,ratingsAverage,summary,difficulty";
   next();
 };
-export const getAllTours = async (req: Request, res: Response) => {
-  try {
-    await dbConnect();
-    const features = new APIFeatures(Tour.find(), req.query)
-      .filter()
-      .sort()
-      .limitFields()
-      .paginate();
+export const getAllTours = catchHandler(async (req: Request, res: Response) => {
+  await dbConnect();
+  const features = new APIFeatures(Tour.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
 
-    const tours = await features.query;
-    res.status(status.OK).json({
-      status: { success: true, code: status.OK },
-      numItem: tours.length,
-      data: { tours },
-    });
-  } catch {
-    res.status(status.BAD_REQUEST).json({
-      status: {
-        success: false,
-        code: status.BAD_REQUEST,
-        message: "Invalid Data sent!",
-      },
-    });
-  }
-};
-export const getTour = async (req: Request, res: Response) => {
-  try {
-    await dbConnect();
-    const { id } = req.params;
-    const tour = await Tour.findById(id);
+  const tours = await features.query;
+  res.status(status.OK).json({
+    status: { success: true, code: status.OK },
+    numItem: tours.length,
+    data: { tours },
+  });
+});
+export const getTour = catchHandler(async (req: Request, res: Response) => {
+  await dbConnect();
+  const { id } = req.params;
+  const tour = await Tour.findById(id);
 
-    res.status(status.OK).json({
-      status: { success: true, code: status.OK },
-      data: { tour },
-    });
-  } catch {
-    res.status(status.NOT_FOUND).json({
-      status: {
-        success: false,
-        code: status.NOT_FOUND,
-        message: "Invalid Data sent!",
-      },
-    });
-  }
-};
-export const createTour = async (req: Request, res: Response) => {
-  try {
-    await dbConnect();
-    const tour = await Tour.create(req.body);
+  res.status(status.OK).json({
+    status: { success: true, code: status.OK },
+    data: { tour },
+  });
+});
+export const createTour = catchHandler(async (req: Request, res: Response) => {
+  await dbConnect();
+  const tour = await Tour.create(req.body);
 
-    res.status(status.CREATED).json({
-      status: { success: true, code: status.CREATED },
-      data: { tour },
-    });
-  } catch (err) {
-    res.status(status.BAD_REQUEST).json({
-      status: {
-        err,
-        success: false,
-        code: status.BAD_REQUEST,
-        message: "Invalid Data sent!",
-      },
-    });
-  }
-};
-export const updateTour = async (req: Request, res: Response) => {
-  try {
-    await dbConnect();
-    const { id } = req.params;
-    const tour = await Tour.findByIdAndUpdate(id, req.body, {
-      // to return the new updated tour
-      new: true,
-      runValidators: true,
-    });
+  res.status(status.CREATED).json({
+    status: { success: true, code: status.CREATED },
+    data: { tour },
+  });
+});
+export const updateTour = catchHandler(async (req: Request, res: Response) => {
+  await dbConnect();
+  const { id } = req.params;
+  const tour = await Tour.findByIdAndUpdate(id, req.body, {
+    // to return the new updated tour
+    new: true,
+    runValidators: true,
+  });
 
-    res.status(status.OK).json({
-      status: { code: status.OK, success: true },
-      data: { tour },
-    });
-  } catch {
-    res.status(status.NOT_FOUND).json({
-      status: {
-        success: false,
-        code: status.NOT_FOUND,
-        message: "Invalid Data sent!",
-      },
-    });
-  }
-};
-export const deleteTour = async (req: Request, res: Response) => {
-  try {
-    await dbConnect();
-    const { id } = req.params;
-    await Tour.findByIdAndDelete(id);
+  res.status(status.OK).json({
+    status: { code: status.OK, success: true },
+    data: { tour },
+  });
+});
+export const deleteTour = catchHandler(async (req: Request, res: Response) => {
+  await dbConnect();
+  const { id } = req.params;
+  await Tour.findByIdAndDelete(id);
 
-    res
-      .status(status.NO_CONTENT)
-      .json({ status: { code: status.NO_CONTENT, success: true }, data: null });
-  } catch {
-    res.status(status.NOT_FOUND).json({
-      status: {
-        success: false,
-        code: status.NOT_FOUND,
-        message: "Invalid Data sent!",
-      },
-    });
-  }
-};
-export const getTourStats = async (_req: Request, res: Response) => {
-  try {
+  res
+    .status(status.NO_CONTENT)
+    .json({ status: { code: status.NO_CONTENT, success: true }, data: null });
+});
+export const getTourStats = catchHandler(
+  async (_req: Request, res: Response) => {
     await dbConnect();
     const stats = await Tour.aggregate([
       { $match: { ratingsAverage: { $gte: 4.5 } } },
@@ -147,18 +97,10 @@ export const getTourStats = async (_req: Request, res: Response) => {
       status: { success: true, code: status.OK },
       data: { stats },
     });
-  } catch {
-    res.status(status.BAD_REQUEST).json({
-      status: {
-        success: false,
-        code: status.BAD_REQUEST,
-        message: "Invalid Data sent!",
-      },
-    });
-  }
-};
-export const getMonthlyPlan = async (req: Request, res: Response) => {
-  try {
+  },
+);
+export const getMonthlyPlan = catchHandler(
+  async (req: Request, res: Response) => {
     await dbConnect();
     const year = +req.params.year;
     const plan = await Tour.aggregate([
@@ -193,13 +135,5 @@ export const getMonthlyPlan = async (req: Request, res: Response) => {
       status: { success: true, code: status.OK },
       data: { plan },
     });
-  } catch {
-    res.status(status.BAD_REQUEST).json({
-      status: {
-        success: false,
-        code: status.BAD_REQUEST,
-        message: "Invalid Data sent!",
-      },
-    });
-  }
-};
+  },
+);

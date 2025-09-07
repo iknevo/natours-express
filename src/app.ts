@@ -1,4 +1,5 @@
 import config from "@/config/config";
+import { globalErrorHanlder } from "@/helpers/global-error-handler";
 import { toursRouter } from "@/modules/tour/tour.routes";
 import { usersRouter } from "@/modules/user/auth.routes";
 import { AppError } from "@/utils/app-error";
@@ -40,19 +41,11 @@ app.use("/api/users", usersRouter);
 app.all(/.*/, (req, _res, next) => {
   next(
     new AppError(
-      `Can't find ${req.originalUrl} on this server!`,
+      `Can't find ${req.originalUrl} on the server`,
       status.NOT_FOUND,
     ),
   );
 });
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  res.status(err.statusCode || status.INTERNAL_SERVER_ERROR).json({
-    status: {
-      success: false,
-      code: err.statusCode || status.INTERNAL_SERVER_ERROR,
-      message: err.message || "Internal Server Error",
-    },
-  });
-});
+app.use(globalErrorHanlder);
 
 export default app;

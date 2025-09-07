@@ -65,9 +65,10 @@ export const createTour = async (req: Request, res: Response) => {
       status: { success: true, code: status.CREATED },
       data: { tour },
     });
-  } catch {
+  } catch (err) {
     res.status(status.BAD_REQUEST).json({
       status: {
+        err,
         success: false,
         code: status.BAD_REQUEST,
         message: "Invalid Data sent!",

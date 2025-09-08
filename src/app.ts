@@ -38,6 +38,7 @@ app.use((req, _res, next) => {
 
 app.use("/api/tours", toursRouter);
 app.use("/api/users", usersRouter);
+
 app.all(/.*/, (req, _res, next) => {
   next(
     new AppError(

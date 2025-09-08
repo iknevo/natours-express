@@ -5,11 +5,9 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "watch": "bun --watch src/server.ts",
     "debug": "bun --watch --inspect src/server.ts",
-    "dev": "cross-env NODE_ENV=development",
-    "start:dev": "bun run dev && bun run watch",
-    "start:prod": "cross-env NODE_ENV=production bun src/server.ts",
+    "dev": "cross-env NODE_ENV=development bun --watch src/server.ts",
+    "prod": "cross-env NODE_ENV=production bun --watch src/server.ts",
     "db:create": "bun src/scripts/seed.ts --create",
     "db:delete": "bun src/scripts/seed.ts --delete",
     "db:seed": "bun run db:delete && bun run db:create"

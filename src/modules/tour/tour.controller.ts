@@ -1,4 +1,3 @@
-import dbConnect from "@/config/db";
 import { Tour } from "@/modules/tour/tour.model";
 import { APIFeatures } from "@/utils/api-features";
 import { AppError } from "@/utils/app-error";
@@ -6,7 +5,6 @@ import { catchHandler } from "@/utils/catch-handler";
 import { endOfYear, startOfYear } from "date-fns";
 import { NextFunction, Request, Response } from "express";
 import { status } from "http-status";
-import mongoose from "mongoose";
 
 export const aliasTopTours = (
   req: Request,
@@ -20,7 +18,6 @@ export const aliasTopTours = (
 };
 
 export const getAllTours = catchHandler(async (req: Request, res: Response) => {
-  await dbConnect();
   const features = new APIFeatures(Tour.find(), req.query)
     .filter()
     .sort()
@@ -36,11 +33,7 @@ export const getAllTours = catchHandler(async (req: Request, res: Response) => {
 
 export const getTour = catchHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    await dbConnect();
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return next(new AppError("Invalid Id format", status.BAD_REQUEST));
-    }
     const tour = await Tour.findById(id);
     if (!tour) {
       return next(new AppError("Tour not found", status.NOT_FOUND));
@@ -53,7 +46,6 @@ export const getTour = catchHandler(
 );
 
 export const createTour = catchHandler(async (req: Request, res: Response) => {
-  await dbConnect();
   const tour = await Tour.create(req.body);
   res.status(status.CREATED).json({
     status: { success: true, code: status.CREATED },
@@ -63,11 +55,7 @@ export const createTour = catchHandler(async (req: Request, res: Response) => {
 
 export const updateTour = catchHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    await dbConnect();
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return next(new AppError("Invalid Id format", status.BAD_REQUEST));
-    }
     const tour = await Tour.findByIdAndUpdate(id, req.body, {
       // to return the new updated tour
       new: true,
@@ -85,11 +73,7 @@ export const updateTour = catchHandler(
 
 export const deleteTour = catchHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    await dbConnect();
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return next(new AppError("Invalid Id", status.BAD_REQUEST));
-    }
     const tour = await Tour.findByIdAndDelete(id);
     if (!tour) {
       return next(new AppError("Tour not found", status.NOT_FOUND));
@@ -102,7 +86,6 @@ export const deleteTour = catchHandler(
 
 export const getTourStats = catchHandler(
   async (_req: Request, res: Response) => {
-    await dbConnect();
     const stats = await Tour.aggregate([
       { $match: { ratingsAverage: { $gte: 4.5 } } },
       {
@@ -129,7 +112,6 @@ export const getTourStats = catchHandler(
 
 export const getMonthlyPlan = catchHandler(
   async (req: Request, res: Response) => {
-    await dbConnect();
     const year = +req.params.year;
     const plan = await Tour.aggregate([
       { $unwind: "$startDates" },

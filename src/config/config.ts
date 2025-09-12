@@ -1,11 +1,28 @@
 /* eslint-disable no-process-env */
+import { Secret, SignOptions } from "jsonwebtoken";
+
+function getEnv(key: string, required = true): string {
+  const value = process.env[key];
+  if (!value && required) {
+    throw new Error(`❌ Missing environment variable: ${key}`);
+  }
+  return value || "";
+}
 
 const config = {
+  nodeEnv: process.env.NODE_ENV || "development",
   development: process.env.NODE_ENV === "development",
   production: process.env.NODE_ENV === "production",
-  port: process.env.PORT! || 8000,
-  database: process.env.DB_URL!,
-  databaseName: process.env.DB_NAME || "natours",
+
+  port: Number(process.env.PORT) || 8000,
+
+  database: getEnv("DB_URL"),
+  databaseName: getEnv("DB_NAME", false) || "natours",
+
+  jwt: {
+    secret: getEnv("JWT_SECRET") as Secret,
+    expiresIn: getEnv("JWT_EXPIRES_IN") as SignOptions["expiresIn"],
+  },
 };
 
 export default config;

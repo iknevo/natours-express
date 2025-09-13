@@ -13,16 +13,20 @@ const config = {
   nodeEnv: process.env.NODE_ENV || "development",
   development: process.env.NODE_ENV === "development",
   production: process.env.NODE_ENV === "production",
-
   port: Number(process.env.PORT) || 8000,
-
   database: getEnv("DB_URL"),
   databaseName: getEnv("DB_NAME", false) || "natours",
-
   jwt: {
     secret: getEnv("JWT_SECRET") as Secret,
-    expiresIn: getEnv("JWT_EXPIRES_IN") as SignOptions["expiresIn"],
+    refreshSecret: getEnv("JWT_REFRESH_SECRET") as Secret,
+    refreshExpiresIn: getEnv(
+      "JWT_REFRESH_EXPIRES_IN",
+    ) as SignOptions["expiresIn"],
+    accessExpiresIn: getEnv(
+      "JWT_ACCESS_EXPIRES_IN",
+    ) as SignOptions["expiresIn"],
   },
+  cookiesMaxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
 };
 
 export default config;

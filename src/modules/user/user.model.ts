@@ -2,7 +2,6 @@ import bcrypt from "bcryptjs";
 import { InferSchemaType, Model, model, models, Schema } from "mongoose";
 import validator from "validator";
 
-// name,email,photo,password, passwordConfirm
 const userSchema = new Schema({
   name: {
     type: String,
@@ -20,6 +19,7 @@ const userSchema = new Schema({
     type: String,
     required: [true, "Password is required"],
     minlength: [8, "password must be atleast 8 characters"],
+    select: false,
   },
   passwordConfirm: {
     type: String,
@@ -34,15 +34,22 @@ const userSchema = new Schema({
 });
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    return next();
-  }
+  if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 12);
   this.set("passwordConfirm", undefined);
-
   next();
 });
 
+userSchema.methods.correctPassword = async function (
+  candidatePass: string,
+  userPass: string,
+) {
+  return await bcrypt.compare(candidatePass, userPass);
+};
+
 type UserType = InferSchemaType<typeof userSchema>;
-export const User: Model<UserType> =
-  models.User || model<UserType>("User", userSchema);
+interface UserDocument extends InferSchemaType<typeof userSchema> {
+  correctPassword(candidatePass: string, userPass: string): Promise<boolean>;
+}
+export const User: Model<UserDocument> =
+  models.User || model<UserDocument>("User", userSchema);

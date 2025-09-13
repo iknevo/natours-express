@@ -3,6 +3,7 @@ import { toursRouter } from "@/modules/tour/tour.routes";
 import { usersRouter } from "@/modules/user/auth.routes";
 import { AppError } from "@/utils/app-error";
 import { globalErrorHanlder } from "@/utils/global-error-handler";
+import cookieParser from "cookie-parser";
 import express, { NextFunction, Request, Response } from "express";
 import status from "http-status";
 import morgan from "morgan";
@@ -17,6 +18,7 @@ if (config.development) {
 app.set("query parser", (str: string) => qs.parse(str));
 app.use(express.json());
 app.use(express.static(`public`));
+app.use(cookieParser());
 app.use(
   (
     req: Request & { requestTime?: Date },

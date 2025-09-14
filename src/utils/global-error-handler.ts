@@ -2,6 +2,7 @@ import config from "@/config/config";
 import { AppError } from "@/utils/app-error";
 import { NextFunction, Request, Response } from "express";
 import status from "http-status";
+import jwt from "jsonwebtoken";
 
 function handleCastErr(err: any) {
   const message = `Invalid ${err.path}: ${err.value}`;
@@ -17,6 +18,19 @@ function handleValidationErr(err: any) {
   const errors = Object.values(err.errors).map((el: any) => el.message);
   const message = `Invalid input data. ${errors.join(". ")}`;
   return new AppError(message, status.BAD_REQUEST);
+}
+
+function handleJwtError() {
+  return new AppError(
+    "Invalid Token, Please login again.",
+    status.UNAUTHORIZED,
+  );
+}
+function handleJwtExpired() {
+  return new AppError(
+    "Expired Session, Please login again.",
+    status.UNAUTHORIZED,
+  );
 }
 
 function sendErrorDev(err: any, res: Response) {
@@ -59,6 +73,8 @@ export const globalErrorHanlder = (
     if (error.name === "CastError") error = handleCastErr(error);
     if (error.code === 11000) error = handleDuplicateErr(error);
     if (error.name === "ValidationError") error = handleValidationErr(error);
+    if (error instanceof jwt.JsonWebTokenError) error = handleJwtError();
+    if (error instanceof jwt.TokenExpiredError) error = handleJwtExpired();
     sendErrorProd(error, res);
   }
 };

@@ -42,7 +42,7 @@ function sendTokens(res: Response, id: any) {
 
 export const signup = catchHandler(async (req: Request, res: Response) => {
   // todo: remove password changed at that was for testing
-  const { name, email, password, passwordConfirm, passwordChangedAt } =
+  const { name, email, role, password, passwordConfirm, passwordChangedAt } =
     req.body;
   const newUser = await User.create({
     name,
@@ -50,6 +50,7 @@ export const signup = catchHandler(async (req: Request, res: Response) => {
     password,
     passwordConfirm,
     passwordChangedAt,
+    role,
   });
   const accessToken = sendTokens(res, newUser._id);
   res.status(status.CREATED).json({
@@ -83,7 +84,6 @@ export const login = catchHandler(
     const accessToken = sendTokens(res, user._id);
     res.status(status.OK).json({
       status: "success",
-      user,
       accessToken,
     });
   },
@@ -136,3 +136,17 @@ export const protect = catchHandler(
     next();
   },
 );
+
+export const restrictTo = (...roles: string[]) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return next(
+        new AppError(
+          "You don't have permission to perform this action",
+          status.FORBIDDEN,
+        ),
+      );
+    }
+    next();
+  };
+};

@@ -14,6 +14,12 @@ const userSchema = new Schema({
     lowercase: true,
     validate: [validator.isEmail, "Please provide a valid email"],
   },
+  role: {
+    type: String,
+    required: [true, "A tour must have a group size!"],
+    enum: ["user", "guide", "lead_guide", "admin"],
+    default: "user",
+  },
   photo: String,
   password: {
     type: String,

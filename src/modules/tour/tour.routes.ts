@@ -1,3 +1,4 @@
+import { USER_ROLES } from "@/config/consts";
 import {
   aliasTopTours,
   createTour,
@@ -8,8 +9,8 @@ import {
   getTourStats,
   updateTour,
 } from "@/modules/tour/tour.controller";
+import { protect, restrictTo } from "@/modules/user/auth.controller";
 import express from "express";
-import { protect } from "@/modules/user/auth.controller";
 
 const router = express.Router();
 // router.param("id", checkId);
@@ -18,6 +19,14 @@ router.route("/top-5-cheap").get(aliasTopTours, getAllTours);
 router.route("/tour-stats").get(getTourStats);
 router.route("/monthly-plan/:year").get(getMonthlyPlan);
 router.route("/").get(protect, getAllTours).post(createTour);
-router.route("/:id").get(getTour).patch(updateTour).delete(deleteTour);
+router
+  .route("/:id")
+  .get(getTour)
+  .patch(updateTour)
+  .delete(
+    protect,
+    restrictTo(USER_ROLES.ADMIN, USER_ROLES.LEAD_GUIDE),
+    deleteTour,
+  );
 
 export { router as toursRouter };

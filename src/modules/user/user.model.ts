@@ -82,6 +82,7 @@ userSchema.methods.createPasswordResetToken = function () {
 
 type UserType = InferSchemaType<typeof userSchema>;
 export interface UserDocument extends InferSchemaType<typeof userSchema> {
+  id: string;
   correctPassword(candidatePass: string, userPass: string): Promise<boolean>;
   changedPassowrdAfter(issuedAt: number): boolean;
   createPasswordResetToken(): string;

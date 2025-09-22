@@ -214,3 +214,27 @@ export const resetPassword = catchHandler(
     });
   },
 );
+
+export const updatePassword = catchHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.user as UserDocument;
+    const { password, passwordConfirm, passwordCurrent } = req.body;
+    const user = await User.findById(id).select("+password");
+    if (
+      !user ||
+      !(await user.correctPassword(passwordCurrent, user.password))
+    ) {
+      return next(
+        new AppError("You current password is wrong!", status.UNAUTHORIZED),
+      );
+    }
+    user.password = password;
+    user.passwordConfirm = passwordConfirm;
+    await user.save();
+    const accessToken = sendTokens(res, id);
+    res.status(status.OK).json({
+      status: "success",
+      accessToken,
+    });
+  },
+);

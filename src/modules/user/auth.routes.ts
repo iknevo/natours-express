@@ -2,9 +2,11 @@ import {
   forgotPassword,
   login,
   logout,
+  protect,
   refresh,
   resetPassword,
   signup,
+  updatePassword,
 } from "@/modules/user/auth.controller";
 import {
   createUser,
@@ -22,6 +24,7 @@ router.post("/login", login);
 
 router.post("/forgot-password", forgotPassword);
 router.patch("/reset-password/:token", resetPassword);
+router.patch("/update-password", protect, updatePassword);
 
 //todo: remove testing
 router.post("/refresh", refresh);

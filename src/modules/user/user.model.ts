@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { InferSchemaType, Model, model, models, Schema } from "mongoose";
+import { createHash, randomBytes } from "node:crypto";
 import validator from "validator";
 
 const userSchema = new Schema({
@@ -16,7 +17,6 @@ const userSchema = new Schema({
   },
   role: {
     type: String,
-    required: [true, "A tour must have a group size!"],
     enum: ["user", "guide", "lead_guide", "admin"],
     default: "user",
   },
@@ -38,12 +38,20 @@ const userSchema = new Schema({
     },
   },
   passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 12);
   this.set("passwordConfirm", undefined);
+  next();
+});
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password") || this.isNew) return next();
+  this.passwordChangedAt = new Date(Date.now());
   next();
 });
 
@@ -62,10 +70,21 @@ userSchema.methods.changedPassowrdAfter = function (issuedAt: number) {
   return false;
 };
 
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = randomBytes(32).toString("hex");
+  this.passwordResetToken = createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  console.log({ resetToken }, this.passwordResetToken);
+  return resetToken;
+};
+
 type UserType = InferSchemaType<typeof userSchema>;
 export interface UserDocument extends InferSchemaType<typeof userSchema> {
   correctPassword(candidatePass: string, userPass: string): Promise<boolean>;
   changedPassowrdAfter(issuedAt: number): boolean;
+  createPasswordResetToken(): string;
 }
 export const User: Model<UserDocument> =
   models.User || model<UserDocument>("User", userSchema);

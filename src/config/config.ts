@@ -26,6 +26,12 @@ const config = {
       "JWT_ACCESS_EXPIRES_IN",
     ) as SignOptions["expiresIn"],
   },
+  email: {
+    username: getEnv("EMAIL_USERNAME"),
+    password: getEnv("EMAIL_PASSWORD"),
+    host: getEnv("EMAIL_HOST"),
+    port: +getEnv("EMAIL_PORT"),
+  },
   cookiesMaxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
 };
 

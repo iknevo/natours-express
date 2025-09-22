@@ -2,9 +2,11 @@ import config from "@/config/config";
 import { User, UserDocument } from "@/modules/user/user.model";
 import { AppError } from "@/utils/app-error";
 import { catchHandler } from "@/utils/catch-handler";
+import { sendEmail } from "@/utils/email";
 import { NextFunction, Request, Response } from "express";
 import status from "http-status";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import { createHash } from "node:crypto";
 
 interface CustomJwtPayload extends JwtPayload {
   id: string;
@@ -41,16 +43,12 @@ function sendTokens(res: Response, id: any) {
 }
 
 export const signup = catchHandler(async (req: Request, res: Response) => {
-  // todo: remove password changed at that was for testing
-  const { name, email, role, password, passwordConfirm, passwordChangedAt } =
-    req.body;
+  const { name, email, password, passwordConfirm } = req.body;
   const newUser = await User.create({
     name,
     email,
     password,
     passwordConfirm,
-    passwordChangedAt,
-    role,
   });
   const accessToken = sendTokens(res, newUser._id);
   res.status(status.CREATED).json({
@@ -150,3 +148,69 @@ export const restrictTo = (...roles: string[]) => {
     next();
   };
 };
+
+export const forgotPassword = catchHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return next(
+        new AppError("No user found for this email!", status.NOT_FOUND),
+      );
+    }
+    const resetToken = user.createPasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+    const resetUrl = `${req.protocol}://${req.host}/api/users/reset-password/${resetToken}`;
+    const message = `Forgot your password? submit a PATCH request with you new password and passwordConfirm to ${resetUrl}.\nIf you didn't forget your password please ignore this email`;
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: "Your password reset token (valid for 10 minutes)",
+        message,
+      });
+      res.status(status.OK).json({
+        status: "success",
+        message: "Token sent to email.",
+      });
+    } catch (err) {
+      console.log(err);
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+      return next(
+        new AppError(
+          "There was an error sending email, Try again later.",
+          status.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  },
+);
+
+export const resetPassword = catchHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const hashedToken = createHash("sha256")
+      .update(req.params.token)
+      .digest("hex");
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+    if (!user) {
+      return next(
+        new AppError("Token is invalid or has expired.", status.BAD_REQUEST),
+      );
+    }
+    user.password = req.body.password;
+    user.passwordConfirm = req.body.passwordConfirm;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
+    const accessToken = sendTokens(res, user._id);
+    res.status(status.OK).json({
+      status: "success",
+      accessToken,
+    });
+  },
+);

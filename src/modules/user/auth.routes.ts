@@ -1,4 +1,11 @@
-import { login, logout, refresh, signup } from "@/modules/user/auth.controller";
+import {
+  forgotPassword,
+  login,
+  logout,
+  refresh,
+  resetPassword,
+  signup,
+} from "@/modules/user/auth.controller";
 import {
   createUser,
   deleteUser,
@@ -12,6 +19,10 @@ const router = express.Router();
 
 router.post("/signup", signup);
 router.post("/login", login);
+
+router.post("/forgot-password", forgotPassword);
+router.patch("/reset-password/:token", resetPassword);
+
 //todo: remove testing
 router.post("/refresh", refresh);
 router.post("/logout", logout);

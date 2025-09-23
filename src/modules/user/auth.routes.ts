@@ -13,6 +13,7 @@ import {
   deleteUser,
   getAllUsers,
   getUser,
+  updateMe,
   updateUser,
 } from "@/modules/user/user.controller";
 import express from "express";
@@ -25,6 +26,8 @@ router.post("/login", login);
 router.post("/forgot-password", forgotPassword);
 router.patch("/reset-password/:token", resetPassword);
 router.patch("/update-password", protect, updatePassword);
+
+router.patch("/update-me", protect, updateMe);
 
 //todo: remove testing
 router.post("/refresh", refresh);

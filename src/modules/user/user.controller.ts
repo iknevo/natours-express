@@ -1,7 +1,38 @@
+import { User, UserDocument } from "@/modules/user/user.model";
+import { AppError } from "@/utils/app-error";
 import { catchHandler } from "@/utils/catch-handler";
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { status } from "http-status";
-import { User } from "./user.model";
+
+function filterObj(obj: any, allowedFields: string[]) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([key]) => allowedFields.includes(key)),
+  );
+}
+
+export const updateMe = catchHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.user as UserDocument;
+    const { password, passwordConfirm } = req.body;
+    if (password || passwordConfirm) {
+      return next(
+        new AppError(
+          "This route is not for password updates please use /user/update-password",
+          status.BAD_REQUEST,
+        ),
+      );
+    }
+    const filteredBody = filterObj(req.body, ["name", "email", "admin"]);
+    const updatedUser = await User.findByIdAndUpdate(id, filteredBody, {
+      new: true,
+      runValidators: true,
+    });
+    return res.status(status.OK).json({
+      status: "success",
+      user: updatedUser,
+    });
+  },
+);
 
 export const getAllUsers = catchHandler(
   async (_req: Request, res: Response) => {

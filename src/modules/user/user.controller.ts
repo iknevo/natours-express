@@ -34,6 +34,15 @@ export const updateMe = catchHandler(
   },
 );
 
+export const deleteMe = catchHandler(async (req: Request, res: Response) => {
+  const { id } = req.user as UserDocument;
+  await User.findByIdAndUpdate(id, { active: false });
+  return res.status(status.NO_CONTENT).json({
+    status: "success",
+    user: null,
+  });
+});
+
 export const getAllUsers = catchHandler(
   async (_req: Request, res: Response) => {
     const users = await User.find();

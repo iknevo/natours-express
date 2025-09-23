@@ -10,6 +10,7 @@ import {
 } from "@/modules/user/auth.controller";
 import {
   createUser,
+  deleteMe,
   deleteUser,
   getAllUsers,
   getUser,
@@ -28,6 +29,7 @@ router.patch("/reset-password/:token", resetPassword);
 router.patch("/update-password", protect, updatePassword);
 
 router.patch("/update-me", protect, updateMe);
+router.delete("/delete-me", protect, deleteMe);
 
 //todo: remove testing
 router.post("/refresh", refresh);

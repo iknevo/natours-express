@@ -122,7 +122,7 @@ export const protect = catchHandler(
     if (!user) {
       return next(new AppError("User Not Found", status.UNAUTHORIZED));
     }
-    if (user.changedPassowrdAfter(decoded.iat)) {
+    if (user.changedPasswordAfter(decoded.iat)) {
       return next(
         new AppError(
           "Password changed recently. Please log in again.",

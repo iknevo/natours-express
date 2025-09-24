@@ -5,18 +5,33 @@ import { AppError } from "@/utils/app-error";
 import { globalErrorHanlder } from "@/utils/global-error-handler";
 import cookieParser from "cookie-parser";
 import express, { NextFunction, Request, Response } from "express";
+import { rateLimit } from "express-rate-limit";
+import helmet from "helmet";
+import hpp from "hpp";
 import status from "http-status";
 import morgan from "morgan";
 import qs from "qs";
 
 const app = express();
 
+app.use(helmet());
+const limiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 100,
+  message: "Too many requests from this IP, please try again in 1 hour.",
+});
+app.use("/api", limiter);
+
 if (config.development) {
   app.use(morgan("dev"));
 }
 
 app.set("query parser", (str: string) => qs.parse(str));
-app.use(express.json());
+app.use(
+  express.json({
+    limit: "10kb",
+  }),
+);
 app.use(express.static(`public`));
 app.use(cookieParser());
 interface RequestWithTime extends Request {
@@ -34,6 +49,18 @@ app.use((req, _res, next) => {
   });
   next();
 });
+app.use(
+  hpp({
+    whitelist: [
+      "duration",
+      "ratingsQuantity",
+      "ratingsAverage",
+      "maxGroupSize",
+      "difficulty",
+      "price",
+    ],
+  }),
+);
 
 app.use("/api/tours", toursRouter);
 app.use("/api/users", usersRouter);

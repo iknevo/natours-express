@@ -38,6 +38,7 @@ function sendTokens(res: Response, id: any) {
     secure: config.production,
     sameSite: "strict",
     maxAge: config.cookiesMaxAge,
+    expires: config.cookiesExpires,
   });
   return accessToken;
 }
@@ -53,15 +54,7 @@ export const signup = catchHandler(async (req: Request, res: Response) => {
   const accessToken = sendTokens(res, newUser._id);
   res.status(status.CREATED).json({
     status: "success",
-    data: {
-      user: {
-        accessToken,
-        id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        passwordChangedAt: newUser.passwordChangedAt,
-      },
-    },
+    accessToken,
   });
 });
 

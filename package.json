@@ -18,6 +18,7 @@
   "packageManager": "pnpm@10.15.0",
   "dependencies": {
     "@types/cookie-parser": "^1.4.9",
+    "@types/hpp": "^0.2.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/nodemailer": "^7.0.1",
     "bcryptjs": "^3.0.2",
@@ -26,6 +27,9 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "hpp": "^0.2.3",
     "http-status": "^2.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",

@@ -33,6 +33,7 @@ const config = {
     port: +getEnv("EMAIL_PORT"),
   },
   cookiesMaxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+  cookiesExpires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
 };
 
 export default config;

@@ -2,7 +2,7 @@ import config from "@/config/config";
 import { toursRouter } from "@/modules/tour/tour.routes";
 import { usersRouter } from "@/modules/user/auth.routes";
 import { AppError } from "@/utils/app-error";
-import { globalErrorHanlder } from "@/utils/global-error-handler";
+import { globalErrorHandler } from "@/utils/global-error-handler";
 import cookieParser from "cookie-parser";
 import express, { NextFunction, Request, Response } from "express";
 import { rateLimit } from "express-rate-limit";
@@ -73,6 +73,6 @@ app.all(/.*/, (req, _res, next) => {
     ),
   );
 });
-app.use(globalErrorHanlder);
+app.use(globalErrorHandler);
 
 export default app;

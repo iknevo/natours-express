@@ -57,7 +57,7 @@ function sendErrorProd(err: any, res: Response) {
   }
 }
 
-export const globalErrorHanlder = (
+export const globalErrorHandler = (
   err: any,
   _req: Request,
   res: Response,

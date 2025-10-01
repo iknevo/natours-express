@@ -75,6 +75,35 @@ const toursSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    startLocation: {
+      type: {
+        type: String,
+        default: "Point",
+        enum: ["Point"],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: "Point",
+          enum: ["Point"],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    guides: [
+      {
+        type: Schema.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },
@@ -86,6 +115,14 @@ toursSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
 });
 
+toursSchema.pre<Query<TourType[], TourType>>(/^find/, function (next) {
+  this.populate({
+    path: "guides",
+    select: "-__v -passwordChangedAt",
+  });
+  next();
+});
+
 // only works with .save() and .create()
 toursSchema.pre("save", function (next) {
   this.slug = slugify(this.name, {
@@ -94,6 +131,14 @@ toursSchema.pre("save", function (next) {
   });
   next();
 });
+
+// toursSchema.pre("save", async function (next) {
+//   const guidesPromise = this.guides.map(
+//     async (el) => await User.findById(el),
+//   );
+//   this.guides = await Promise.all(guidesPromise)
+//   next();
+// });
 
 interface QueryWithTimer<T, Y> extends Query<T, Y> {
   start: number;

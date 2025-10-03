@@ -1,4 +1,4 @@
-import { InferSchemaType, Model, model, models, Schema } from "mongoose";
+import { InferSchemaType, Model, model, models, Query, Schema } from "mongoose";
 
 const reviewSchema = new Schema(
   {
@@ -27,6 +27,17 @@ const reviewSchema = new Schema(
     toObject: { virtuals: true },
   },
 );
+
+reviewSchema.pre<Query<reviewType[], reviewType>>(/^find/, function (next) {
+  this.populate({
+    path: "user",
+    select: "name",
+  }).populate({
+    path: "tour",
+    select: "name photo",
+  });
+  next();
+});
 
 type reviewType = InferSchemaType<typeof reviewSchema>;
 export const Review: Model<reviewType> =

@@ -1,4 +1,5 @@
 import config from "@/config/config";
+import { reviewsRouter } from "@/modules/review/review.routes";
 import { toursRouter } from "@/modules/tour/tour.routes";
 import { usersRouter } from "@/modules/user/auth.routes";
 import { AppError } from "@/utils/app-error";
@@ -64,6 +65,7 @@ app.use(
 
 app.use("/api/tours", toursRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/reviews", reviewsRouter);
 
 app.all(/.*/, (req, _res, next) => {
   next(

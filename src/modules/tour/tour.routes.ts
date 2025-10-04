@@ -11,9 +11,13 @@ import {
 } from "@/modules/tour/tour.controller";
 import { protect, restrictTo } from "@/modules/user/auth.controller";
 import express from "express";
+import { reviewsRouter } from "../review/review.routes";
 
 const router = express.Router();
 // router.param("id", checkId);
+
+// /tours/tourId/reviews
+router.use("/:tourId/reviews", reviewsRouter);
 
 router.route("/top-5-cheap").get(aliasTopTours, getAllTours);
 router.route("/tour-stats").get(getTourStats);

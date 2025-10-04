@@ -32,9 +32,6 @@ reviewSchema.pre<Query<reviewType[], reviewType>>(/^find/, function (next) {
   this.populate({
     path: "user",
     select: "name",
-  }).populate({
-    path: "tour",
-    select: "name photo",
   });
   next();
 });

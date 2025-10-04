@@ -2,7 +2,7 @@ import { protect, restrictTo } from "@/modules/user/auth.controller";
 import { Router } from "express";
 import { createReview, getAllReviews } from "./review.controller";
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 router
   .route("/")

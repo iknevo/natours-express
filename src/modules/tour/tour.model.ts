@@ -115,12 +115,11 @@ toursSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
 });
 
-toursSchema.virtual('reviews', {
-  ref: 'Review',
-  localField: '_id',
-  foreignField: 'tour',
+toursSchema.virtual("reviews", {
+  ref: "Review",
+  localField: "_id",
+  foreignField: "tour",
 });
-
 
 toursSchema.pre<Query<TourType[], TourType>>(/^find/, function (next) {
   this.populate({

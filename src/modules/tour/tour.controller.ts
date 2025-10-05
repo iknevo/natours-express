@@ -1,6 +1,11 @@
+import {
+  createOne,
+  deleteOne,
+  getAll,
+  getOne,
+  updateOne,
+} from "@/factory/handler.factory";
 import { Tour } from "@/modules/tour/tour.model";
-import { APIFeatures } from "@/utils/api-features";
-import { AppError } from "@/utils/app-error";
 import { catchHandler } from "@/utils/catch-handler";
 import { endOfYear, startOfYear } from "date-fns";
 import { NextFunction, Request, Response } from "express";
@@ -17,72 +22,25 @@ export const aliasTopTours = (
   next();
 };
 
-export const getAllTours = catchHandler(async (req: Request, res: Response) => {
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const tours = await features.query;
-  res.status(status.OK).json({
-    status: { success: true, code: status.OK },
-    numItem: tours.length,
-    data: { tours },
-  });
-});
+// export const getAllTours = catchHandler(async (req: Request, res: Response) => {
+//   const features = new APIFeatures(Tour.find(), req.query)
+//     .filter()
+//     .sort()
+//     .limitFields()
+//     .paginate();
+//   const tours = await features.query;
+//   res.status(status.OK).json({
+//     status: { success: true, code: status.OK },
+//     numItem: tours.length,
+//     data: { tours },
+//   });
+// });
 
-export const getTour = catchHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-    const tour = await Tour.findById(id).populate("reviews");
-    if (!tour) {
-      return next(new AppError("Tour not found", status.NOT_FOUND));
-    }
-    res.status(status.OK).json({
-      status: { success: true, code: status.OK },
-      data: { tour },
-    });
-  },
-);
-
-export const createTour = catchHandler(async (req: Request, res: Response) => {
-  const tour = await Tour.create(req.body);
-  res.status(status.CREATED).json({
-    status: { success: true, code: status.CREATED },
-    data: { tour },
-  });
-});
-
-export const updateTour = catchHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-    const tour = await Tour.findByIdAndUpdate(id, req.body, {
-      // to return the new updated tour
-      new: true,
-      runValidators: true,
-    });
-    if (!tour) {
-      return next(new AppError("Tour not found", status.NOT_FOUND));
-    }
-    res.status(status.OK).json({
-      status: { code: status.OK, success: true },
-      data: { tour },
-    });
-  },
-);
-
-export const deleteTour = catchHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-    const tour = await Tour.findByIdAndDelete(id);
-    if (!tour) {
-      return next(new AppError("Tour not found", status.NOT_FOUND));
-    }
-    res
-      .status(status.NO_CONTENT)
-      .json({ status: { code: status.NO_CONTENT, success: true }, data: null });
-  },
-);
+export const getAllTours = getAll(Tour);
+export const getTour = getOne(Tour, { path: "reviews" });
+export const createTour = createOne(Tour);
+export const updateTour = updateOne(Tour);
+export const deleteTour = deleteOne(Tour);
 
 export const getTourStats = catchHandler(
   async (_req: Request, res: Response) => {

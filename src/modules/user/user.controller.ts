@@ -1,3 +1,9 @@
+import {
+  deleteOne,
+  getAll,
+  getOne,
+  updateOne,
+} from "@/factory/handler.factory";
 import { User, UserDocument } from "@/modules/user/user.model";
 import { AppError } from "@/utils/app-error";
 import { catchHandler } from "@/utils/catch-handler";
@@ -9,6 +15,11 @@ function filterObj(obj: any, allowedFields: string[]) {
     Object.entries(obj).filter(([key]) => allowedFields.includes(key)),
   );
 }
+
+export const getMe = (req: Request, _res: Response, next: NextFunction) => {
+  req.params.id = req.user!.id;
+  next();
+};
 
 export const updateMe = catchHandler(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -43,49 +54,16 @@ export const deleteMe = catchHandler(async (req: Request, res: Response) => {
   });
 });
 
-export const getAllUsers = catchHandler(
-  async (_req: Request, res: Response) => {
-    const users = await User.find();
-    res.status(status.OK).json({
-      status: { success: true, code: status.OK },
-      numItem: users.length,
-      data: { users },
-    });
-  },
-);
-export const getUser = (_req: Request, res: Response) => {
-  res.status(status.INTERNAL_SERVER_ERROR).json({
-    status: {
-      success: false,
-      code: status.INTERNAL_SERVER_ERROR,
-      message: "this route is not implemented yet!",
-    },
-  });
-};
+export const getAllUsers = getAll(User);
+export const getUser = getOne(User);
+export const updateUser = updateOne(User);
+export const deleteUser = deleteOne(User);
 export const createUser = (_req: Request, res: Response) => {
   res.status(status.INTERNAL_SERVER_ERROR).json({
     status: {
       success: false,
       code: status.INTERNAL_SERVER_ERROR,
-      message: "this route is not implemented yet!",
-    },
-  });
-};
-export const updateUser = (_req: Request, res: Response) => {
-  res.status(status.INTERNAL_SERVER_ERROR).json({
-    status: {
-      success: false,
-      code: status.INTERNAL_SERVER_ERROR,
-      message: "this route is not implemented yet!",
-    },
-  });
-};
-export const deleteUser = (_req: Request, res: Response) => {
-  res.status(status.INTERNAL_SERVER_ERROR).json({
-    status: {
-      success: false,
-      code: status.INTERNAL_SERVER_ERROR,
-      message: "this route is not implemented yet!",
+      message: "this route is not implemented!, Please use /signup",
     },
   });
 };

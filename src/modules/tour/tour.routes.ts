@@ -14,19 +14,34 @@ import express from "express";
 import { reviewsRouter } from "../review/review.routes";
 
 const router = express.Router();
-// router.param("id", checkId);
-
 // /tours/tourId/reviews
 router.use("/:tourId/reviews", reviewsRouter);
 
 router.route("/top-5-cheap").get(aliasTopTours, getAllTours);
 router.route("/tour-stats").get(getTourStats);
-router.route("/monthly-plan/:year").get(getMonthlyPlan);
-router.route("/").get(protect, getAllTours).post(createTour);
+router
+  .route("/monthly-plan/:year")
+  .get(
+    protect,
+    restrictTo(USER_ROLES.ADMIN, USER_ROLES.LEAD_GUIDE, USER_ROLES.GUIDE),
+    getMonthlyPlan,
+  );
+router
+  .route("/")
+  .get(getAllTours)
+  .post(
+    protect,
+    restrictTo(USER_ROLES.ADMIN, USER_ROLES.LEAD_GUIDE),
+    createTour,
+  );
 router
   .route("/:id")
   .get(getTour)
-  .patch(updateTour)
+  .patch(
+    protect,
+    restrictTo(USER_ROLES.ADMIN, USER_ROLES.LEAD_GUIDE),
+    updateTour,
+  )
   .delete(
     protect,
     restrictTo(USER_ROLES.ADMIN, USER_ROLES.LEAD_GUIDE),

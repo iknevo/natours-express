@@ -17,7 +17,8 @@ function filterObj(obj: any, allowedFields: string[]) {
 }
 
 export const getMe = (req: Request, _res: Response, next: NextFunction) => {
-  req.params.id = req.user!.id;
+  const { id } = req.user as UserDocument;
+  req.params.id = id;
   next();
 };
 

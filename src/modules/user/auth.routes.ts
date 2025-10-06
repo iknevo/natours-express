@@ -1,3 +1,4 @@
+import { USER_ROLES } from "@/config/consts";
 import {
   forgotPassword,
   login,
@@ -5,6 +6,7 @@ import {
   protect,
   refresh,
   resetPassword,
+  restrictTo,
   signup,
   updatePassword,
 } from "@/modules/user/auth.controller";
@@ -24,18 +26,20 @@ const router = express.Router();
 
 router.post("/signup", signup);
 router.post("/login", login);
-
 router.post("/forgot-password", forgotPassword);
 router.patch("/reset-password/:token", resetPassword);
-router.patch("/update-password", protect, updatePassword);
-
-router.get("/me", protect, getMe, getUser);
-router.patch("/update-me", protect, updateMe);
-router.delete("/delete-me", protect, deleteMe);
-
 router.post("/refresh", refresh);
+
+router.use(protect);
+
+router.patch("/update-password", updatePassword);
+router.get("/me", getMe, getUser);
+router.patch("/update-me", updateMe);
+router.delete("/delete-me", deleteMe);
+
 router.post("/logout", logout);
 
+router.use(restrictTo(USER_ROLES.ADMIN));
 router.route("/").get(getAllUsers).post(createUser);
 router.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
 

@@ -79,7 +79,7 @@ export function updateOne<T>(model: Model<T>) {
     async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
       const doc = await model.findByIdAndUpdate(id, req.body, {
-        // to return the new updated tour
+        // to return the new updated doc
         new: true,
         runValidators: true,
       });

@@ -1,4 +1,4 @@
-import { InferSchemaType, Model, model, models, Query, Schema } from "mongoose";
+import { InferSchemaType, model, Query, Schema } from "mongoose";
 import slugify from "slugify";
 
 const toursSchema = new Schema(
@@ -34,6 +34,7 @@ const toursSchema = new Schema(
       default: 4.5,
       min: [1, "Ratings average must be above 1.0"],
       max: [5, "Ratings average must be below 5.0"],
+      set: (val: number) => Math.round(val * 10) / 10,
     },
     ratingsQuantity: {
       type: Number,
@@ -108,18 +109,32 @@ const toursSchema = new Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    virtuals: {
+      durationWeeks: {
+        get() {
+          return this.duration / 7;
+        },
+      },
+      reviews: {
+        options: {
+          ref: "Review",
+          localField: "_id",
+          foreignField: "tour",
+        },
+      },
+    },
   },
 );
 
-toursSchema.virtual("durationWeeks").get(function () {
-  return this.duration / 7;
-});
+// toursSchema.index({ price: 1 });
+toursSchema.index({ price: 1, ratingsAverage: -1 });
+toursSchema.index({ slug: 1 });
 
-toursSchema.virtual("reviews", {
-  ref: "Review",
-  localField: "_id",
-  foreignField: "tour",
-});
+// toursSchema.virtual("reviews", {
+//   ref: "Review",
+//   localField: "_id",
+//   foreignField: "tour",
+// });
 
 toursSchema.pre<Query<TourType[], TourType>>(/^find/, function (next) {
   this.populate({
@@ -150,16 +165,19 @@ interface QueryWithTimer<T, Y> extends Query<T, Y> {
   start: number;
 }
 
-toursSchema.pre<QueryWithTimer<any, any>>(/^find/, function (next) {
+toursSchema.pre<QueryWithTimer<TourType[], TourType>>(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });
   this.start = Date.now();
   next();
 });
 
-toursSchema.post<QueryWithTimer<any, any>>(/^find/, function (_, next) {
-  console.log(`Query took ${Date.now() - this.start} milliseconds!`);
-  next();
-});
+toursSchema.post<QueryWithTimer<TourType[], TourType>>(
+  /^find/,
+  function (_, next) {
+    console.log(`Query took ${Date.now() - this.start} milliseconds!`);
+    next();
+  },
+);
 
 toursSchema.pre("aggregate", function (next) {
   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
@@ -167,5 +185,4 @@ toursSchema.pre("aggregate", function (next) {
 });
 
 type TourType = InferSchemaType<typeof toursSchema>;
-export const Tour: Model<TourType> =
-  models.Tour || model<TourType>("Tour", toursSchema);
+export const Tour = model("Tour", toursSchema);

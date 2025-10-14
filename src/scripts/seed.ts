@@ -1,12 +1,20 @@
 import dbConnect from "@/config/db";
+import { Review } from "@/modules/review/review.model";
 import { Tour } from "@/modules/tour/tour.model";
-import { tours } from "./data";
+import { User } from "@/modules/user/user.model";
+import { reviews, tours, users } from "./data";
 
 const createData = async () => {
   try {
     await dbConnect();
     await Tour.create(tours);
+    await User.create(users, {
+      validateBeforeSave: false,
+    });
+    await Review.create(reviews);
     console.log("Tours seeded to DB");
+    console.log("Users seeded to DB");
+    console.log("Reviews seeded to DB");
   } catch (error) {
     console.error(error);
   } finally {
@@ -18,7 +26,11 @@ const deleteData = async () => {
   try {
     await dbConnect();
     await Tour.deleteMany();
+    await User.deleteMany();
+    await Review.deleteMany();
     console.log("Tours deleted from DB");
+    console.log("Users deleted from DB");
+    console.log("Reviews deleted from DB");
   } catch (error) {
     console.error(error);
   } finally {

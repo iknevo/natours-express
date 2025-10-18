@@ -4,9 +4,11 @@ import {
   createTour,
   deleteTour,
   getAllTours,
+  getDistances,
   getMonthlyPlan,
   getTour,
   getTourStats,
+  getToursWithin,
   updateTour,
 } from "@/modules/tour/tour.controller";
 import { protect, restrictTo } from "@/modules/user/auth.controller";
@@ -26,6 +28,10 @@ router
     restrictTo(USER_ROLES.ADMIN, USER_ROLES.LEAD_GUIDE, USER_ROLES.GUIDE),
     getMonthlyPlan,
   );
+router
+  .route("/tours-within/:distance/center/:coords/unit/:unit")
+  .get(getToursWithin);
+router.route("/distances/:coords/unit/:unit").get(getDistances);
 router
   .route("/")
   .get(getAllTours)

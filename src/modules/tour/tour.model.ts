@@ -129,6 +129,7 @@ const toursSchema = new Schema(
 // toursSchema.index({ price: 1 });
 toursSchema.index({ price: 1, ratingsAverage: -1 });
 toursSchema.index({ slug: 1 });
+toursSchema.index({ startLocation: "2dsphere" });
 
 // toursSchema.virtual("reviews", {
 //   ref: "Review",
@@ -179,10 +180,10 @@ toursSchema.post<QueryWithTimer<TourType[], TourType>>(
   },
 );
 
-toursSchema.pre("aggregate", function (next) {
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  next();
-});
+// toursSchema.pre("aggregate", function (next) {
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   next();
+// });
 
 type TourType = InferSchemaType<typeof toursSchema>;
 export const Tour = model("Tour", toursSchema);

@@ -6,6 +6,7 @@ import {
   updateOne,
 } from "@/factory/handler.factory";
 import { Tour } from "@/modules/tour/tour.model";
+import { AppError } from "@/utils/app-error";
 import { catchHandler } from "@/utils/catch-handler";
 import { endOfYear, startOfYear } from "date-fns";
 import { NextFunction, Request, Response } from "express";
@@ -64,6 +65,109 @@ export const getTourStats = catchHandler(
     res.status(status.OK).json({
       status: { success: true, code: status.OK },
       data: { stats },
+    });
+  },
+);
+
+// /tours-within/:distance/center/:coords/unit/:unit
+// /tours-within/220/center/31.017199, 30.404611/unit/km
+enum EARTH_RADIUS {
+  KM = 6378.152,
+  MI = 3963.2,
+}
+export const getToursWithin = catchHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { distance, coords, unit } = req.params;
+    const [lat, lng] = coords.split(",");
+    const sphereRadius =
+      unit === "mi"
+        ? Number(distance) / EARTH_RADIUS.MI
+        : Number(distance) / EARTH_RADIUS.KM;
+    if (!lat || !lng) {
+      next(
+        new AppError(
+          "Please provide latitude and longitude in the format lat, lng",
+          status.BAD_REQUEST,
+        ),
+      );
+    }
+    const data = { distance, lat, lng, unit, sphereRadius };
+
+    // $geoWithin: { $centerSphere: [[lng, lat], radius] },
+    // earth radius = 3963.2 mi || 6378.152 km
+    const tours = await Tour.find({
+      startLocation: {
+        $geoWithin: { $centerSphere: [[lng, lat], sphereRadius] },
+      },
+    });
+
+    console.log(data);
+    res.status(status.OK).json({
+      status: { success: true, code: status.OK },
+      numItems: tours.length,
+      data: { tours },
+    });
+  },
+);
+
+export const getDistances = catchHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { coords, unit } = req.params;
+    const [lat, lng] = coords.split(",");
+    if (!lat || !lng) {
+      next(
+        new AppError(
+          "Please provide latitude and longitude in the format lat, lng",
+          status.BAD_REQUEST,
+        ),
+      );
+    }
+    const data = { lat, lng, unit };
+    const distances = await Tour.aggregate([
+      {
+        $geoNear: {
+          near: { type: "Point", coordinates: [Number(lng), Number(lat)] },
+          distanceField: "distance",
+        },
+      },
+      {
+        $addFields: {
+          distance: {
+            $round: [
+              {
+                $switch: {
+                  branches: [
+                    {
+                      case: { $eq: [unit, "km"] },
+                      then: { $divide: ["$distance", 1000] },
+                    },
+                    {
+                      case: { $eq: [unit, "mi"] },
+                      then: { $divide: ["$distance", 1609.34] },
+                    },
+                  ],
+                  default: "$distance",
+                },
+              },
+              2,
+            ],
+          },
+          distanceUnit: unit,
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          distance: 1,
+          distanceUnit: 1,
+        },
+      },
+    ]);
+    console.log(data);
+    res.status(status.OK).json({
+      status: { success: true, code: status.OK },
+      numItems: distances.length,
+      data: { distances },
     });
   },
 );

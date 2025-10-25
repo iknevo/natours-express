@@ -11,6 +11,7 @@ import helmet from "helmet";
 import hpp from "hpp";
 import status from "http-status";
 import morgan from "morgan";
+import path from "path";
 import qs from "qs";
 
 const app = express();
@@ -28,12 +29,15 @@ if (config.development) {
 }
 
 app.set("query parser", (str: string) => qs.parse(str));
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "views"));
+app.use(express.static("public"));
+
 app.use(
   express.json({
     limit: "10kb",
   }),
 );
-app.use(express.static(`public`));
 app.use(cookieParser());
 interface RequestWithTime extends Request {
   requestTime?: Date;
@@ -62,6 +66,13 @@ app.use(
     ],
   }),
 );
+
+app.get("/", (_req: Request, res: Response) => {
+  res.status(status.OK).render("base", {
+    tour: "The tour",
+    user: "nevo",
+  });
+});
 
 app.use("/api/tours", toursRouter);
 app.use("/api/users", usersRouter);

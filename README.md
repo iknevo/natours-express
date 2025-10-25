@@ -1,1 +1,1 @@
-# first app with node + express + ts
+# first express app

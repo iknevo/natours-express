@@ -2,6 +2,7 @@ import config from "@/config/config";
 import { reviewsRouter } from "@/modules/review/review.routes";
 import { toursRouter } from "@/modules/tour/tour.routes";
 import { usersRouter } from "@/modules/user/auth.routes";
+import { viewsRouter } from "@/routes/views.routes";
 import { AppError } from "@/utils/app-error";
 import { globalErrorHandler } from "@/utils/global-error-handler";
 import cookieParser from "cookie-parser";
@@ -67,13 +68,7 @@ app.use(
   }),
 );
 
-app.get("/", (_req: Request, res: Response) => {
-  res.status(status.OK).render("base", {
-    tour: "The tour",
-    user: "nevo",
-  });
-});
-
+app.use("/", viewsRouter);
 app.use("/api/tours", toursRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/reviews", reviewsRouter);

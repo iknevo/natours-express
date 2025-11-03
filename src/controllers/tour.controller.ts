@@ -5,7 +5,7 @@ import {
   getOne,
   updateOne,
 } from "@/factory/handler.factory";
-import { Tour } from "@/modules/tour/tour.model";
+import { Tour } from "@/models/tour.model";
 import { AppError } from "@/utils/app-error";
 import { catchHandler } from "@/utils/catch-handler";
 import { endOfYear, startOfYear } from "date-fns";

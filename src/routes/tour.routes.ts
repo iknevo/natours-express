@@ -1,4 +1,5 @@
 import { USER_ROLES } from "@/config/consts";
+import { protect, restrictTo } from "@/controllers/auth.controller";
 import {
   aliasTopTours,
   createTour,
@@ -10,10 +11,9 @@ import {
   getTourStats,
   getToursWithin,
   updateTour,
-} from "@/modules/tour/tour.controller";
-import { protect, restrictTo } from "@/modules/user/auth.controller";
+} from "@/controllers/tour.controller";
 import express from "express";
-import { reviewsRouter } from "../review/review.routes";
+import { reviewsRouter } from "./review.routes";
 
 const router = express.Router();
 // /tours/tourId/reviews

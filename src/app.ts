@@ -1,7 +1,7 @@
 import config from "@/config/config";
-import { reviewsRouter } from "@/modules/review/review.routes";
-import { toursRouter } from "@/modules/tour/tour.routes";
-import { usersRouter } from "@/modules/user/auth.routes";
+import { usersRouter } from "@/routes/auth.routes";
+import { reviewsRouter } from "@/routes/review.routes";
+import { toursRouter } from "@/routes/tour.routes";
 import { viewsRouter } from "@/routes/views.routes";
 import { AppError } from "@/utils/app-error";
 import { globalErrorHandler } from "@/utils/global-error-handler";

@@ -5,8 +5,8 @@ import {
   getOne,
   updateOne,
 } from "@/factory/handler.factory";
+import { Review } from "@/models/review.model";
 import { NextFunction, Request, Response } from "express";
-import { Review } from "./review.model";
 
 export const setUserAndTourIds = (
   req: Request,

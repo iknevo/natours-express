@@ -1,7 +1,7 @@
 import dbConnect from "@/config/db";
-import { Review } from "@/modules/review/review.model";
-import { Tour } from "@/modules/tour/tour.model";
-import { User } from "@/modules/user/user.model";
+import { Review } from "@/models/review.model";
+import { Tour } from "@/models/tour.model";
+import { User } from "@/models/user.model";
 import { reviews, tours, users } from "./data";
 
 const createData = async () => {

@@ -1,5 +1,5 @@
 import config from "@/config/config";
-import { User, UserDocument } from "@/modules/user/user.model";
+import { User, UserDocument } from "@/models/user.model";
 import { AppError } from "@/utils/app-error";
 import { catchHandler } from "@/utils/catch-handler";
 import { sendEmail } from "@/utils/email";

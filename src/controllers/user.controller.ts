@@ -4,7 +4,7 @@ import {
   getOne,
   updateOne,
 } from "@/factory/handler.factory";
-import { User, UserDocument } from "@/modules/user/user.model";
+import { User, UserDocument } from "@/models/user.model";
 import { AppError } from "@/utils/app-error";
 import { catchHandler } from "@/utils/catch-handler";
 import type { NextFunction, Request, Response } from "express";

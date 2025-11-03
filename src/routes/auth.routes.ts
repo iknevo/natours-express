@@ -9,7 +9,7 @@ import {
   restrictTo,
   signup,
   updatePassword,
-} from "@/modules/user/auth.controller";
+} from "@/controllers/auth.controller";
 import {
   createUser,
   deleteMe,
@@ -19,7 +19,7 @@ import {
   getUser,
   updateMe,
   updateUser,
-} from "@/modules/user/user.controller";
+} from "@/controllers/user.controller";
 import express from "express";
 
 const router = express.Router();

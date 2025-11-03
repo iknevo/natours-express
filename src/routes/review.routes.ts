@@ -1,6 +1,5 @@
 import { USER_ROLES } from "@/config/consts";
-import { protect, restrictTo } from "@/modules/user/auth.controller";
-import { Router } from "express";
+import { protect, restrictTo } from "@/controllers/auth.controller";
 import {
   createReview,
   deleteReview,
@@ -8,7 +7,8 @@ import {
   getReview,
   setUserAndTourIds,
   updateReview,
-} from "./review.controller";
+} from "@/controllers/review.controller";
+import { Router } from "express";
 
 const router = Router({ mergeParams: true });
 router.use(protect);

@@ -1,4 +1,4 @@
-import { Tour } from "@/modules/tour/tour.model";
+import { Tour } from "@/models/tour.model";
 import { InferSchemaType, model, Query, Schema, Types } from "mongoose";
 
 const reviewSchema = new Schema(

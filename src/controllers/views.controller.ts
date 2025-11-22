@@ -13,8 +13,15 @@ export const getOverview = catchHandler(
   },
 );
 
-export function getTour(_req: Request, res: Response) {
-  res.status(status.OK).render("tour", {
-    title: "test tour",
+export const getTour = catchHandler(async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const tour = await Tour.findOne({ slug }).populate({
+    path: "reviews",
+    select: "review rating user",
   });
-}
+
+  res.status(status.OK).render("tour", {
+    title: `${tour.name} tour`,
+    tour,
+  });
+});

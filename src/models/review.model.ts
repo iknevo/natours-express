@@ -75,7 +75,7 @@ reviewSchema.post(/^findOneAnd/, async function () {
 reviewSchema.pre<Query<reviewType[], reviewType>>(/^find/, function (next) {
   this.populate({
     path: "user",
-    select: "name",
+    select: "name photo",
   });
   next();
 });

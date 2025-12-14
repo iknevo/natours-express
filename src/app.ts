@@ -17,11 +17,15 @@ import qs from "qs";
 
 const app = express();
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false
+  })
+);
 const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   limit: 100,
-  message: "Too many requests from this IP, please try again in 1 hour.",
+  message: "Too many requests from this IP, please try again in 1 hour."
 });
 app.use("/api", limiter);
 
@@ -36,8 +40,8 @@ app.use(express.static("public"));
 
 app.use(
   express.json({
-    limit: "10kb",
-  }),
+    limit: "10kb"
+  })
 );
 app.use(cookieParser());
 interface RequestWithTime extends Request {
@@ -51,7 +55,7 @@ app.use((req, _res, next) => {
   Object.defineProperty(req, "query", {
     ...Object.getOwnPropertyDescriptor(req, "query"),
     value: req.query,
-    writable: true,
+    writable: true
   });
   next();
 });
@@ -63,9 +67,9 @@ app.use(
       "ratingsAverage",
       "maxGroupSize",
       "difficulty",
-      "price",
-    ],
-  }),
+      "price"
+    ]
+  })
 );
 
 app.use("/", viewsRouter);
@@ -77,8 +81,8 @@ app.all(/.*/, (req, _res, next) => {
   next(
     new AppError(
       `Can't find ${req.originalUrl} on the server`,
-      status.NOT_FOUND,
-    ),
+      status.NOT_FOUND
+    )
   );
 });
 app.use(globalErrorHandler);

@@ -560,17 +560,18 @@ body {
   cursor: pointer;
 }
 
-.mapboxgl-popup {
+.leaflet-popup {
   max-width: 25rem;
 }
 
-.mapboxgl-popup-content {
+.leaflet-popup-content {
   text-align: center;
   font-family: "Lato", sans-serif;
-  padding: 1.5rem !important;
-  font-size: 1.4rem;
-  -webkit-box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important;
-  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important;
+  /* padding: 1.5rem !important; */
+  font-size: 1.4rem !important;
+  font-weight: bold;
+  /* -webkit-box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important; */
+  /* box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important; */
 }
 
 .section-reviews {

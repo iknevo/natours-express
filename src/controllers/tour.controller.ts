@@ -3,7 +3,7 @@ import {
   deleteOne,
   getAll,
   getOne,
-  updateOne,
+  updateOne
 } from "@/factory/handler.factory";
 import { Tour } from "@/models/tour.model";
 import { AppError } from "@/utils/app-error";
@@ -15,7 +15,7 @@ import { status } from "http-status";
 export const aliasTopTours = (
   req: Request,
   _res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   req.query.limit = "5";
   req.query.sort = "-ratingsAverage,price";
@@ -55,25 +55,25 @@ export const getTourStats = catchHandler(
           avgRating: { $avg: "$ratingsAverage" },
           avgPrice: { $avg: "$price" },
           minPrice: { $min: "$price" },
-          maxPrice: { $max: "$price" },
-        },
+          maxPrice: { $max: "$price" }
+        }
       },
       {
-        $sort: { avgPrice: -1 },
-      },
+        $sort: { avgPrice: -1 }
+      }
     ]);
     res.status(status.OK).json({
       status: { success: true, code: status.OK },
-      data: { stats },
+      data: { stats }
     });
-  },
+  }
 );
 
 // /tours-within/:distance/center/:coords/unit/:unit
 // /tours-within/220/center/31.017199, 30.404611/unit/km
 enum EARTH_RADIUS {
   KM = 6378.152,
-  MI = 3963.2,
+  MI = 3963.2
 }
 export const getToursWithin = catchHandler(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -87,27 +87,25 @@ export const getToursWithin = catchHandler(
       next(
         new AppError(
           "Please provide latitude and longitude in the format lat, lng",
-          status.BAD_REQUEST,
-        ),
+          status.BAD_REQUEST
+        )
       );
     }
-    const data = { distance, lat, lng, unit, sphereRadius };
 
     // $geoWithin: { $centerSphere: [[lng, lat], radius] },
     // earth radius = 3963.2 mi || 6378.152 km
     const tours = await Tour.find({
       startLocation: {
-        $geoWithin: { $centerSphere: [[lng, lat], sphereRadius] },
-      },
+        $geoWithin: { $centerSphere: [[lng, lat], sphereRadius] }
+      }
     });
 
-    console.log(data);
     res.status(status.OK).json({
       status: { success: true, code: status.OK },
       numItems: tours.length,
-      data: { tours },
+      data: { tours }
     });
-  },
+  }
 );
 
 export const getDistances = catchHandler(
@@ -118,8 +116,8 @@ export const getDistances = catchHandler(
       next(
         new AppError(
           "Please provide latitude and longitude in the format lat, lng",
-          status.BAD_REQUEST,
-        ),
+          status.BAD_REQUEST
+        )
       );
     }
     const data = { lat, lng, unit };
@@ -127,8 +125,8 @@ export const getDistances = catchHandler(
       {
         $geoNear: {
           near: { type: "Point", coordinates: [Number(lng), Number(lat)] },
-          distanceField: "distance",
-        },
+          distanceField: "distance"
+        }
       },
       {
         $addFields: {
@@ -139,37 +137,37 @@ export const getDistances = catchHandler(
                   branches: [
                     {
                       case: { $eq: [unit, "km"] },
-                      then: { $divide: ["$distance", 1000] },
+                      then: { $divide: ["$distance", 1000] }
                     },
                     {
                       case: { $eq: [unit, "mi"] },
-                      then: { $divide: ["$distance", 1609.34] },
-                    },
+                      then: { $divide: ["$distance", 1609.34] }
+                    }
                   ],
-                  default: "$distance",
-                },
+                  default: "$distance"
+                }
               },
-              2,
-            ],
+              2
+            ]
           },
-          distanceUnit: unit,
-        },
+          distanceUnit: unit
+        }
       },
       {
         $project: {
           name: 1,
           distance: 1,
-          distanceUnit: 1,
-        },
-      },
+          distanceUnit: 1
+        }
+      }
     ]);
     console.log(data);
     res.status(status.OK).json({
       status: { success: true, code: status.OK },
       numItems: distances.length,
-      data: { distances },
+      data: { distances }
     });
-  },
+  }
 );
 
 export const getMonthlyPlan = catchHandler(
@@ -181,30 +179,30 @@ export const getMonthlyPlan = catchHandler(
         $match: {
           startDates: {
             $gte: startOfYear(new Date(year, 0, 1)),
-            $lte: endOfYear(new Date(year, 0, 1)),
-          },
-        },
+            $lte: endOfYear(new Date(year, 0, 1))
+          }
+        }
       },
       {
         $group: {
           _id: { $month: "$startDates" },
           numTourStarts: { $sum: 1 },
           tours: {
-            $push: "$name",
-          },
-        },
+            $push: "$name"
+          }
+        }
       },
       { $addFields: { month: "$_id" } },
       {
         $project: {
-          _id: 0,
-        },
+          _id: 0
+        }
       },
-      { $sort: { numTourStart: -1 } },
+      { $sort: { numTourStart: -1 } }
     ]);
     res.status(status.OK).json({
       status: { success: true, code: status.OK },
-      data: { plan },
+      data: { plan }
     });
-  },
+  }
 );

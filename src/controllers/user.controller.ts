@@ -2,7 +2,7 @@ import {
   deleteOne,
   getAll,
   getOne,
-  updateOne,
+  updateOne
 } from "@/factory/handler.factory";
 import { User, UserDocument } from "@/models/user.model";
 import { AppError } from "@/utils/app-error";
@@ -12,7 +12,7 @@ import { status } from "http-status";
 
 function filterObj(obj: any, allowedFields: string[]) {
   return Object.fromEntries(
-    Object.entries(obj).filter(([key]) => allowedFields.includes(key)),
+    Object.entries(obj).filter(([key]) => allowedFields.includes(key))
   );
 }
 
@@ -30,20 +30,20 @@ export const updateMe = catchHandler(
       return next(
         new AppError(
           "This route is not for password updates please use /user/update-password",
-          status.BAD_REQUEST,
-        ),
+          status.BAD_REQUEST
+        )
       );
     }
     const filteredBody = filterObj(req.body, ["name", "email", "admin"]);
     const updatedUser = await User.findByIdAndUpdate(id, filteredBody, {
       new: true,
-      runValidators: true,
+      runValidators: true
     });
     return res.status(status.OK).json({
       status: "success",
-      user: updatedUser,
+      user: updatedUser
     });
-  },
+  }
 );
 
 export const deleteMe = catchHandler(async (req: Request, res: Response) => {
@@ -51,7 +51,7 @@ export const deleteMe = catchHandler(async (req: Request, res: Response) => {
   await User.findByIdAndUpdate(id, { active: false });
   return res.status(status.NO_CONTENT).json({
     status: "success",
-    user: null,
+    user: null
   });
 });
 
@@ -64,7 +64,7 @@ export const createUser = (_req: Request, res: Response) => {
     status: {
       success: false,
       code: status.INTERNAL_SERVER_ERROR,
-      message: "this route is not implemented!, Please use /signup",
-    },
+      message: "this route is not implemented!, Please use /signup"
+    }
   });
 };

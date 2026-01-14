@@ -2,7 +2,7 @@
   "name": "natours",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
     "debug": "bun --watch --inspect src/server.ts",
@@ -10,7 +10,9 @@
     "prod": "cross-env NODE_ENV=production bun --watch src/server.ts",
     "db:create": "bun src/scripts/seed.ts --create",
     "db:delete": "bun src/scripts/seed.ts --delete",
-    "db:seed": "bun run db:delete && bun run db:create"
+    "db:seed": "bun run db:delete && bun run db:create",
+    "watch:js": "parcel watch public/scripts/index.js --out-dir public/scripts --out-file bundle.js",
+    "build:js": "parcel build public/scripts/index.js --out-dir public/scripts --out-file bundle.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +23,7 @@
     "@types/hpp": "^0.2.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/nodemailer": "^7.0.1",
+    "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cross-env": "^10.0.0",
@@ -32,6 +35,7 @@
     "hpp": "^0.2.3",
     "http-status": "^2.1.0",
     "jsonwebtoken": "^9.0.2",
+    "leaflet": "^1.9.4",
     "mongoose": "^8.18.2",
     "morgan": "^1.10.1",
     "nanoid": "^5.1.6",
@@ -51,6 +55,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "globals": "^16.3.0",
+    "parcel-bundler": "1.12.3",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.41.0"

@@ -20,13 +20,13 @@ declare module "express" {
 
 function generateAccessToken(id: any) {
   return jwt.sign({ id }, config.jwt.secret, {
-    expiresIn: config.jwt.accessExpiresIn,
+    expiresIn: config.jwt.accessExpiresIn
   });
 }
 
 function generateRefreshToken(id: any) {
   return jwt.sign({ id }, config.jwt.refreshSecret, {
-    expiresIn: config.jwt.refreshExpiresIn,
+    expiresIn: config.jwt.refreshExpiresIn
   });
 }
 
@@ -38,7 +38,14 @@ function sendTokens(res: Response, id: any) {
     secure: config.production,
     sameSite: "strict",
     maxAge: config.cookiesMaxAge,
-    expires: config.cookiesExpires,
+    expires: config.cookiesExpires
+  });
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: config.production,
+    sameSite: "strict",
+    maxAge: config.cookiesMaxAge,
+    expires: config.cookiesExpires
   });
   return accessToken;
 }
@@ -49,12 +56,12 @@ export const signup = catchHandler(async (req: Request, res: Response) => {
     name,
     email,
     password,
-    passwordConfirm,
+    passwordConfirm
   });
   const accessToken = sendTokens(res, newUser._id);
   res.status(status.CREATED).json({
     status: "success",
-    accessToken,
+    accessToken
   });
 });
 
@@ -63,21 +70,21 @@ export const login = catchHandler(
     const { email, password } = req.body;
     if (!email || !password) {
       return next(
-        new AppError("Please Provide email and password", status.BAD_REQUEST),
+        new AppError("Please Provide email and password", status.BAD_REQUEST)
       );
     }
     const user = await User.findOne({ email }).select("+password");
     if (!user || !(await user.correctPassword(password, user.password))) {
       return next(
-        new AppError("Invalid email or password", status.UNAUTHORIZED),
+        new AppError("Invalid email or password", status.UNAUTHORIZED)
       );
     }
     const accessToken = sendTokens(res, user._id);
     res.status(status.OK).json({
       status: "success",
-      accessToken,
+      accessToken
     });
-  },
+  }
 );
 
 export const refresh = catchHandler(
@@ -91,9 +98,9 @@ export const refresh = catchHandler(
     };
     const accessToken = generateAccessToken(decoded.id);
     res.json({
-      accessToken,
+      accessToken
     });
-  },
+  }
 );
 
 export const logout = catchHandler(async (_req: Request, res: Response) => {
@@ -102,15 +109,17 @@ export const logout = catchHandler(async (_req: Request, res: Response) => {
 
 export const protect = catchHandler(
   async (req: Request, _res: Response, next: NextFunction) => {
+    let token;
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer")) {
+    if (authHeader && authHeader.startsWith("Bearer")) {
+      token = authHeader?.split(" ")[1];
+    } else if (req.cookies.accessToken) {
+      token = req.cookies.accessToken;
+    }
+    if (!token) {
       return next(new AppError("No Token Provided", status.UNAUTHORIZED));
     }
-    const accessToken = authHeader.split(" ")[1];
-    const decoded = jwt.verify(
-      accessToken,
-      config.jwt.secret,
-    ) as CustomJwtPayload;
+    const decoded = jwt.verify(token, config.jwt.secret) as CustomJwtPayload;
     const user = await User.findById(decoded.id);
     if (!user) {
       return next(new AppError("User Not Found", status.UNAUTHORIZED));
@@ -119,13 +128,34 @@ export const protect = catchHandler(
       return next(
         new AppError(
           "Password changed recently. Please log in again.",
-          status.UNAUTHORIZED,
-        ),
+          status.UNAUTHORIZED
+        )
       );
     }
     req.user = user;
     next();
-  },
+  }
+);
+
+export const isLoggedIn = catchHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.cookies.accessToken) {
+      const decoded = jwt.verify(
+        req.cookies.accessToken,
+        config.jwt.secret
+      ) as CustomJwtPayload;
+      const user = await User.findById(decoded.id);
+      if (!user) {
+        return next();
+      }
+      if (user.changedPasswordAfter(decoded.iat)) {
+        return next();
+      }
+      res.locals.user = user;
+      return next();
+    }
+    next();
+  }
 );
 
 export const restrictTo = (...roles: string[]) => {
@@ -134,8 +164,8 @@ export const restrictTo = (...roles: string[]) => {
       return next(
         new AppError(
           "You don't have permission to perform this action",
-          status.FORBIDDEN,
-        ),
+          status.FORBIDDEN
+        )
       );
     }
     next();
@@ -148,7 +178,7 @@ export const forgotPassword = catchHandler(
     const user = await User.findOne({ email });
     if (!user) {
       return next(
-        new AppError("No user found for this email!", status.NOT_FOUND),
+        new AppError("No user found for this email!", status.NOT_FOUND)
       );
     }
     const resetToken = user.createPasswordResetToken();
@@ -159,11 +189,11 @@ export const forgotPassword = catchHandler(
       await sendEmail({
         email: user.email,
         subject: "Your password reset token (valid for 10 minutes)",
-        message,
+        message
       });
       res.status(status.OK).json({
         status: "success",
-        message: "Token sent to email.",
+        message: "Token sent to email."
       });
     } catch (err) {
       console.log(err);
@@ -173,11 +203,11 @@ export const forgotPassword = catchHandler(
       return next(
         new AppError(
           "There was an error sending email, Try again later.",
-          status.INTERNAL_SERVER_ERROR,
-        ),
+          status.INTERNAL_SERVER_ERROR
+        )
       );
     }
-  },
+  }
 );
 
 export const resetPassword = catchHandler(
@@ -187,11 +217,11 @@ export const resetPassword = catchHandler(
       .digest("hex");
     const user = await User.findOne({
       passwordResetToken: hashedToken,
-      passwordResetExpires: { $gt: Date.now() },
+      passwordResetExpires: { $gt: Date.now() }
     });
     if (!user) {
       return next(
-        new AppError("Token is invalid or has expired.", status.BAD_REQUEST),
+        new AppError("Token is invalid or has expired.", status.BAD_REQUEST)
       );
     }
     user.password = req.body.password;
@@ -203,9 +233,9 @@ export const resetPassword = catchHandler(
     const accessToken = sendTokens(res, user._id);
     res.status(status.OK).json({
       status: "success",
-      accessToken,
+      accessToken
     });
-  },
+  }
 );
 
 export const updatePassword = catchHandler(
@@ -218,7 +248,7 @@ export const updatePassword = catchHandler(
       !(await user.correctPassword(passwordCurrent, user.password))
     ) {
       return next(
-        new AppError("You current password is wrong!", status.UNAUTHORIZED),
+        new AppError("You current password is wrong!", status.UNAUTHORIZED)
       );
     }
     user.password = password;
@@ -227,7 +257,7 @@ export const updatePassword = catchHandler(
     const accessToken = sendTokens(res, id);
     res.status(status.OK).json({
       status: "success",
-      accessToken,
+      accessToken
     });
-  },
+  }
 );
